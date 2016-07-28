@@ -28,15 +28,30 @@ function StateObject(model){
       this.transitions.push({target : getCellText(edge.attributes.target), condition: getCellText(edge)});  
     }
   }
+  this.transitionText = function(state){
+    text = "\t\t" + state.name + ' : begin\n'
+    for (index in state.transitions){
+      condition = state.transitions[index].condition;
+      target = state.transitions[index].target;
+      text += "\t\t\t"
+      if (index != 0) {text += "else ";}
+      text += "if ( " + condition + " )\n"
+      text += "\t\t\t\tnextState = " + target + ";\n"
+    }
+    text += "\t\tend\n\n"
+    return text;
+  }(this);
 }
 
 var StateData = {
   stateDict : {},
   getBitRange : function(){
-    var upperBit = this.stateArray.length > 1 ? Math.ceil(Math.log2(this.stateArray.length)) - 1: 0;
+    length = Object.keys(this.stateDict).length;
+    var upperBit = length > 1 ? Math.ceil(Math.log2(length)) - 1: 0;
     return "[" + upperBit + ":0]"
   },
   populateStateDict : function(){
+    this.stateDict = {}
     for (index in graph.attributes.cells.models){
       cell = graph.attributes.cells.models[index];
       if (isState(cell)){
@@ -44,6 +59,45 @@ var StateData = {
         this.stateDict[state.name] = state;
       }
     }
+  },
+  getEnumText : function(){
+    enumText = "typedef enum bit " + this.getBitRange() + " {\n"
+    for (stateName in this.stateDict){
+      enumText += "\t" + stateName + ",\n"
+    }
+    enumText = enumText.substring(0,enumText.length-2) + "\n} StateType;\n\n";
+    enumText += 'StateType state\n';
+    enumText += 'StateType nextState\n\n';
+    return enumText;
+  },
+  
+  getTransitionText : function(){
+    text =  "always_comb begin\n";
+    text += "\t nextState = state; // Default behaviour, don't change state.\n";
+    text += "\t case(state)\n";
+    for (stateName in this.stateDict){
+      text += this.stateDict[stateName].transitionText;
+    }
+    text += "\tendcase\n"
+    text += "end\n\n"
+    return text;
+  },
+  
+  getVerilogHTML : function(){
+    // Build up the text part by part
+    html =  this.getEnumText();
+    html += this.getTransitionText();
+    
+    // Convert to a nice html format
+    html = html.replace(new RegExp('\n', 'g'),'<br>');
+    html = html.replace(new RegExp('\t', 'g'),'&nbsp&nbsp&nbsp&nbsp');
+    return html;
+  },
+  
+  update : function(){
+    this.populateStateDict()
+    html = this.getVerilogHTML();
+    document.getElementById("verilog").innerHTML = html;
   },
 }
  

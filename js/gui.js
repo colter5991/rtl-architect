@@ -16,13 +16,7 @@ var mainContent = `
 var rightContent = `
   <h2>Verilog Code</h2>
   <hr>
-  <div id="transitions">
-    typedef enum bit[1:0]{
-      STATE_A,
-      STATE_B,
-      STATE_C,
-      STATE_D
-    };
+  <div id="verilog">
   </div>
 `
 
