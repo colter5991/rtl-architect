@@ -22,10 +22,12 @@ function StateObject(model){
   this.name = getCellText(model);
   this.transitions = [];
   // Populate the transitions list
-  for (index in graph.attributes.cells.models){
-    edge = graph.attributes.cells.models[index];
-    if (!isState(edge) && edge.attributes.source == model){
-      this.transitions.push({target : getCellText(edge.attributes.target), condition: getCellText(edge)});  
+  linkList = graph.getConnectedLinks(model, {outbound: true})
+  for (index in linkList){
+    edge = linkList[index];
+    target = edge.getTargetElement();
+    if (target){
+      this.transitions.push({target : getCellText(target), condition: getCellText(edge)});  
     }
   }
   this.transitionText = function(state){
@@ -33,6 +35,7 @@ function StateObject(model){
     for (index in state.transitions){
       condition = state.transitions[index].condition;
       target = state.transitions[index].target;
+      //if (target == null) {continue;}
       text += "\t\t\t"
       if (index != 0) {text += "else ";}
       text += "if ( " + condition + " )\n"
@@ -52,12 +55,11 @@ var StateData = {
   },
   populateStateDict : function(){
     this.stateDict = {}
-    for (index in graph.attributes.cells.models){
-      cell = graph.attributes.cells.models[index];
-      if (isState(cell)){
-        state = new StateObject(cell);
-        this.stateDict[state.name] = state;
-      }
+    elements = graph.getElements()
+    for (index in elements){
+      cell = elements[index];
+      state = new StateObject(cell);
+      this.stateDict[state.name] = state;
     }
   },
   getEnumText : function(){
@@ -129,7 +131,10 @@ function newState(xpos, ypos, name){
     size: {width: 120, height:40},
     attrs: {text:{text:name}}
   });
+  
   graph.addCell(state);
+  StateData.update();
+  
   return state;
 }
 
@@ -154,6 +159,8 @@ function setCellText(state, text){
     activeCell.attr("text/text", text)
   else
     state.label(0,{attrs:{text:{text: text}}})
+    
+  StateData.update();
 }
 
 // Get the text of the given cell
@@ -179,6 +186,9 @@ function newTransition(source, target, name){
     target: target,
     labels: [{ position: 0.5, attrs: { text: { text: name || ''} } }],
   });
+  
+  cell.on("change:source", function(){StateData.update();});
+  cell.on("change:target", function(){StateData.update();});
       
   graph.addCell(cell);
   return cell;
@@ -197,19 +207,6 @@ function initGraph(){
       model: graph
   });
 
-/*
-  s1 = new joint.shapes.fsa.State({
-      position: { x: 100, y: 30 },
-      size: { width: 100, height: 30 },
-      attrs: {text: { text: 'FOO', fill: 'black' } }
-  });
-  
-  s2 = new joint.shapes.fsa.State({
-      position: { x: 400, y: 30 },
-      size: { width: 100, height: 30 },
-      attrs: {text: { text: 'BAR', fill: 'black' } }
-  });
-*/
   s1 = newState(100,100, "FOO");
   s2 = newState(100,400, "BAR");
   s3 = newState(400,100, "FOO_2");
@@ -220,7 +217,7 @@ function initGraph(){
   newTransition(s3, s1, "(z[2] == y) && (x != y)");
   newTransition(s2, s4, "w & z & !x");
   newTransition(s4, s1, "z | w | (z ^ x)");
-  
+  StateData.update();
 
 
 /*****************************************************************************
