@@ -1,0 +1,13 @@
+#padding {
+  width:1000px;
+  height: 1000px;
+}
+
+html,body {
+  height:100%;
+  font-family:monospace;
+}
+
+#paper:focus{
+  outline:none;
+}
