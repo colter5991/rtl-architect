@@ -48,11 +48,16 @@ function StateObject(model){
 
 var StateData = {
   stateDict : {},
+  edge : "Positive",
+  reset : "Active High",
+  init : "",
+  
   getBitRange : function(){
     length = Object.keys(this.stateDict).length;
     var upperBit = length > 1 ? Math.ceil(Math.log2(length)) - 1: 0;
     return "[" + upperBit + ":0]"
   },
+  
   populateStateDict : function(){
     this.stateDict = {}
     elements = graph.getElements()
@@ -62,20 +67,21 @@ var StateData = {
       this.stateDict[state.name] = state;
     }
   },
+  
   getEnumText : function(){
     enumText = "typedef enum bit " + this.getBitRange() + " {\n"
     for (stateName in this.stateDict){
       enumText += "\t" + stateName + ",\n"
     }
     enumText = enumText.substring(0,enumText.length-2) + "\n} StateType;\n\n";
-    enumText += 'StateType state\n';
-    enumText += 'StateType nextState\n\n';
+    enumText += 'StateType state;\n';
+    enumText += 'StateType nextState;\n\n';
     return enumText;
   },
   
   getTransitionText : function(){
     text =  "always_comb begin\n";
-    text += "\t nextState = state; // Default behaviour, don't change state.\n";
+    text += "\t nextState = state;\n";
     text += "\t case(state)\n";
     for (stateName in this.stateDict){
       text += this.stateDict[stateName].transitionText;
@@ -85,10 +91,39 @@ var StateData = {
     return text;
   },
   
+  getFFText : function(){
+    // Determine the edge of the clock
+    if (this.edge == "Positive")
+      clockEdge = "posedge";
+    else if (this.edge == "Negative")
+      clockEdge = "negedge";
+    else
+      clockEdge = "";
+      
+    // Determine the edge of the reset
+    if (this.reset == "Active High"){
+      resetEdge = "posedge";
+      resetCondition = "rst == 1";
+    }
+    else{
+      resetCondition = "rst == 0";
+      resetEdge = "negedge";
+    }
+    
+    text = "always_ff @("+clockEdge+" clk, " + resetEdge + " rst) begin\n"
+    text += "\tif ("+resetCondition+");\n";
+    text += "\t\tstate <= "+this.init+";\n";
+    text += "\telse\n"
+    text += "\t\tstate <= nextState\n";
+    text += "end\n\n";
+    return text;
+  },
+  
   getVerilogHTML : function(){
     // Build up the text part by part
     html =  this.getEnumText();
     html += this.getTransitionText();
+    html += this.getFFText();
     
     // Convert to a nice html format
     html = html.replace(new RegExp('\n', 'g'),'<br>');
@@ -141,6 +176,7 @@ function newState(xpos, ypos, name){
 // delete a given state
 function deleteState(state){
   state.remove();
+  StateData.update();
 };
 
 // Set the stroke of the given cell to the given color
