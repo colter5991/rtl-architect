@@ -52,10 +52,22 @@ var StateData = {
   reset : "Active High",
   init : "",
   
+  // Function to get how many bits it takes to represent all of the states
+  getStateWidth : function(){
+    var length = graph.getElements().length;
+    if (length <= 2)
+      return 1;
+    else
+      return Math.ceil(Math.log2(length));
+  },
+  
+  // Return a string representing the bit range, for example "[3:0]"
   getBitRange : function(){
-    length = Object.keys(this.stateDict).length;
-    var upperBit = length > 1 ? Math.ceil(Math.log2(length)) - 1: 0;
-    return "[" + upperBit + ":0]"
+    upperBit = this.getStateWidth() - 1;
+    if (upperBit == 0)
+      return ""
+    else
+      return "[" + upperBit + ":0]"
   },
   
   populateStateDict : function(){
