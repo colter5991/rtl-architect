@@ -17,37 +17,8 @@ var activeCell;   // The active JointJs cell object
 /*****************************************************************************
  * Object definitions
  *****************************************************************************/
- 
-function StateObject(model){
-  this.name = getCellText(model);
-  this.transitions = [];
-  // Populate the transitions list
-  linkList = graph.getConnectedLinks(model, {outbound: true})
-  for (index in linkList){
-    edge = linkList[index];
-    target = edge.getTargetElement();
-    if (target){
-      this.transitions.push({target : getCellText(target), condition: getCellText(edge)});  
-    }
-  }
-  this.transitionText = function(state){
-    text = "\t\t" + state.name + ' : begin\n'
-    for (index in state.transitions){
-      condition = state.transitions[index].condition;
-      target = state.transitions[index].target;
-      //if (target == null) {continue;}
-      text += "\t\t\t"
-      if (index != 0) {text += "else ";}
-      text += "if ( " + condition + " )\n"
-      text += "\t\t\t\tnextState = " + target + ";\n"
-    }
-    text += "\t\tend\n\n"
-    return text;
-  }(this);
-}
 
 var StateData = {
-  stateDict : {},         // DEPRECATED, a dictionary of states, keys are the name
   edge : "Positive",      // Whether the clock edge is positive, negative, or both
   reset : "Active High",  // Whether the reset signal is active high or active low
   init : "",              // The name of the initial state
@@ -87,17 +58,6 @@ var StateData = {
       return ""
     else
       return "[" + upperBit + ":0]"
-  },
-  
-  // DEPRECATED
-  populateStateDict : function(){
-    this.stateDict = {}
-    elements = graph.getElements()
-    for (index in elements){
-      cell = elements[index];
-      state = new StateObject(cell);
-      this.stateDict[state.name] = state;
-    }
   },
   
   getEnumText : function(){
@@ -212,7 +172,6 @@ var StateData = {
   },
   
   update : function(){
-    //this.populateStateDict()
     html = this.getVerilogHTML();
     document.getElementById("verilog").innerHTML = html;
   },
@@ -299,6 +258,8 @@ function setCellText(state, text){
 
 // Get the text of the given cell
 function getCellText(state){
+  if(!state)
+    return null;
   if(state.attributes.type == "fsa.State")
     return state.attr("text/text");
   else
