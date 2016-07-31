@@ -47,12 +47,31 @@ function StateObject(model){
 }
 
 var StateData = {
-  stateDict : {},
-  edge : "Positive",
-  reset : "Active High",
-  init : "",
+  stateDict : {},         // DEPRECATED, a dictionary of states, keys are the name
+  edge : "Positive",      // Whether the clock edge is positive, negative, or both
+  reset : "Active High",  // Whether the reset signal is active high or active low
+  init : "",              // The name of the initial state
+  
+  // Get the transition text for a single state.  That is the case statement
+  // block with the big ol' if/else if structure to choose the nextState.
+  getStateTransitionText(state){
+    var text = "\t\t" + getCellText(state) + ' : begin\n'
+    tList = graph.getConnectedLinks(state, {"outbound":true});
+    for (tIndex in tList){
+      t = tList[tIndex];
+      condition = getCellText(t);
+      target = getCellText(t.getTargetElement());
+      text += "\t\t\t"
+      if (tIndex != 0) {text += "else ";}
+      text += "if ( " + condition + " )\n"
+      text += "\t\t\t\tnextState = " + target + ";\n"
+    }
+    text += "\t\tend\n\n"
+    return text;
+  },
   
   // Function to get how many bits it takes to represent all of the states
+  // For example, 5 states require 3 bits to represent.
   getStateWidth : function(){
     var length = graph.getElements().length;
     if (length <= 2)
@@ -70,6 +89,7 @@ var StateData = {
       return "[" + upperBit + ":0]"
   },
   
+  // DEPRECATED
   populateStateDict : function(){
     this.stateDict = {}
     elements = graph.getElements()
@@ -82,8 +102,10 @@ var StateData = {
   
   getEnumText : function(){
     enumText = "typedef enum bit " + this.getBitRange() + " {\n"
-    for (stateName in this.stateDict){
-      enumText += "\t" + stateName + ",\n"
+    stateList = graph.getElements()
+    for (stateIndex in stateList){
+      state = stateList[stateIndex];
+      enumText += "\t" + getCellText(state) + ",\n"
     }
     enumText = enumText.substring(0,enumText.length-2) + "\n} StateType;\n\n";
     enumText += 'StateType state;\n';
@@ -95,9 +117,16 @@ var StateData = {
     text =  "always_comb begin\n";
     text += "\t nextState = state;\n";
     text += "\t case(state)\n";
-    for (stateName in this.stateDict){
-      text += this.stateDict[stateName].transitionText;
-    }
+    
+    //for (stateName in this.stateDict){
+    //  text += this.stateDict[stateName].transitionText;
+    //}
+    stateList = graph.getElements()
+    for (stateIndex in stateList){
+      state = stateList[stateIndex];
+      text += this.getStateTransitionText(state);
+    }    
+    
     text += "\tendcase\n"
     text += "end\n\n"
     return text;
@@ -131,11 +160,50 @@ var StateData = {
     return text;
   },
   
+  getOutputText : function(){
+    var record;
+    stateDict = {};
+    defaultState = {};
+    for (index in w2ui['grid'].records){
+      record = w2ui['grid'].records[index];
+      defaultState[record.variable] = record['default'];
+      for (stateID in record){
+        if (stateID != 'variable' && stateID != 'default' && stateID != 'changes'){
+          if(!stateDict[stateID])
+            stateDict[stateID] = {}
+          stateDict[stateID][record.variable] = record[stateID];
+        }
+      }
+    }
+    var text = "always_comb begin\n";
+    for (var variable in defaultState){
+      text += "\t" + variable + " = " + defaultState[variable] + ";\n";
+    }
+    text += "\n\tcase(state)\n";
+    for (var stateID in stateDict){
+      if (stateID == 'recid')
+        continue;
+      stateName = getCellText(graph.getCell(stateID));
+      text += "\t\t"+stateName + ": begin\n"
+      for (var variable in stateDict[stateID]){
+        var expression = stateDict[stateID][variable];
+        if (expression != ""){
+          text += "\t\t\t"+variable+" = "+expression+";\n"
+        }
+      }
+      text += "\t\tend\n\n";
+    }
+    text += "\tendcase\n"
+    text += "end\n\n"
+    return text;
+  },
+  
   getVerilogHTML : function(){
     // Build up the text part by part
     html =  this.getEnumText();
     html += this.getTransitionText();
     html += this.getFFText();
+    html += this.getOutputText();
     
     // Convert to a nice html format
     html = html.replace(new RegExp('\n', 'g'),'<br>');
@@ -144,7 +212,7 @@ var StateData = {
   },
   
   update : function(){
-    this.populateStateDict()
+    //this.populateStateDict()
     html = this.getVerilogHTML();
     document.getElementById("verilog").innerHTML = html;
   },
@@ -181,12 +249,30 @@ function newState(xpos, ypos, name){
   
   graph.addCell(state);
   StateData.update();
+  w2ui['grid'].columns.push({ field: state.id, caption: name, size: '120px', sortable: true, resizable: true, 
+    editable: { type: 'text' }
+  });
+  
+  recordList = w2ui['grid'].records;
+  for (index in recordList){
+    record = recordList[index];
+    record[state.id] = "";
+  }
   
   return state;
 }
 
 // delete a given state
 function deleteState(state){
+  for (index in w2ui['grid'].columns){
+    if (w2ui['grid'].columns[index].field == state.id){
+      w2ui['grid'].columns.splice(index,1);
+      break;
+    }
+  }
+  for (index in w2ui['grid'].records){
+    delete w2ui['grid'].records[index][state.id];
+  }
   state.remove();
   StateData.update();
 };

@@ -6,8 +6,24 @@
 html,body {
   height:100%;
   font-family:monospace;
+  overflow: hidden;
 }
 
 #paper:focus{
   outline:none;
 }
+
+.title {
+  display: inline;
+}
+
+h2.title{
+  color: #888888;
+}
+
+/*
+#tab1-content{
+  color: ##ff0000;
+  overflow: scroll;
+}
+*/

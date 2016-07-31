@@ -1,6 +1,11 @@
+var topContent = `
+  <h1 class="title">State Machine Designer</h1>
+  <h2 class="title">(v0.0.0)</h2>
+`
+
 var mainContent = `
   <div id="tabs"></div>
-  <div id="tabs-content" style="height: 800px; padding: 10px; border: 1px solid #ccc; border-top: 0px">
+  <div id="tabs-content" style="height: 600px; padding: 10px; border: 1px solid #ccc; border-top: 0px">
     <div id="tab1-content">
       <h1>Next State Logic</h1>
       <div id="paper" class="paper" tabindex="0"></div>
@@ -53,7 +58,7 @@ function initGrid(){
     $('#layout').w2layout({
         name: 'layout',
         panels: [
-            { type: 'top',  size: 50, resizable: true, style: pstyle, content: 'top' },
+            { type: 'top',  size: 60, resizable: true, style: pstyle, content: topContent },
             { type: 'main', style: pstyle, content: mainContent },
             { type: 'right', size: 400, resizable: true, style: pstyle, content: rightContent },
             { type: 'bottom', size: 50, resizable: true, style: pstyle, content: 'bottom' }
@@ -87,6 +92,7 @@ function switchToTab(currentTab, tabArr){
       tabObject.css("display", "none");
       updateRegForm();
       w2ui['regForm'].refresh();
+      w2ui['grid'].refresh();
     }
   }
   if(currentTab == "tab1"){
@@ -126,7 +132,6 @@ function initRegSettings(){
   
   
   w2ui['regForm'].on('change', function (event) { event.onComplete = function(event){
-    console.log(this.record);
     if(w2ui['regForm'].record.edge)
       StateData.edge = w2ui['regForm'].record.edge.text;
     if(w2ui['regForm'].record.reset)
@@ -139,7 +144,8 @@ function initRegSettings(){
 
 function updateRegForm(){
   itemList = []
-  nameList = Object.keys(StateData.stateDict)
+  //nameList = Object.keys(StateData.stateDict)
+  nameList = graph.getElements().map(x => getCellText(x));
   for (index in nameList){
     state = nameList[index];
     itemList.push({id:state, name:state})
@@ -149,53 +155,64 @@ function updateRegForm(){
 }
 
 function initTable() {
-    $('#grid').w2grid({ 
-        name: 'grid', 
-        show: { 
-            toolbar: true,
-            footer: true,
-            toolbarSave: true
-        },
-        columns: [                
-            { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
-            { field: 'var', caption: 'text', size: '120px', sortable: true, resizable: true, 
-                editable: { type: 'text' }
-            },
-            { field: 'condition', caption: 'text', size: '120px', sortable: true, resizable: true, 
-                editable: { type: 'text' }
-            },
+  $('#grid').w2grid({ 
+      name: 'grid', 
+      show: { 
+          toolbar: true,
+          footer: false,
+          toolbarSave: false,
+      },
+      columns: [                
+          { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
+          { field: 'variable', caption: 'Variable Name', size: '120px', sortable: true, resizable: true, 
+              editable: { type: 'text' }
+          },
+          { field: 'default', caption: 'Default Value', size: '120px', sortable: true, resizable: true, 
+              editable: { type: 'text' }
+          },
+      ],
+      toolbar: {
+          items: [
+              { id: 'add', type: 'button', caption: 'Add Record', icon: 'w2ui-icon-plus' }
+          ],
+          onClick: function (event) {
+              if (event.target == 'add') {
+                  w2ui.grid.add({ recid: w2ui.grid.records.length + 1, variable:"VAR"+(w2ui.grid.records.length + 1), 'default': 0 });
+              }
+          }
+      },
+      records: [
+          { recid: 1, variable:'Y', default: 0},
+      ],
+      
+      onChange : function(event){ event.onComplete = function(event){
+        this.save();
+        StateData.update();
+      }}
+  }); 
 
-        ],
-        toolbar: {
-            items: [
-                { id: 'add', type: 'button', caption: 'Add Record', icon: 'w2ui-icon-plus' }
-            ],
-            onClick: function (event) {
-                if (event.target == 'add') {
-                    w2ui.grid.add({ recid: w2ui.grid.records.length + 1 });
-                }
-            }
-        },
-        records: [
-            { recid: 1, int: 100, money: 100, percent: 55, date: '1/1/2014', combo: 'John Cook', check: true },
-            { recid: 2, int: 200, money: 454.40, percent: 15, date: '1/1/2014', combo: 'John Cook', check: false, list: { id: 2, text: 'Steve Jobs' } },
-            { recid: 3, int: 350, money: 1040, percent: 98, date: '3/14/2014', combo: 'John Cook', check: true },
-            { recid: 4, int: 350, money: 140, percent: 58, date: '1/31/2014', combo: 'John Cook', check: true, list: { id: 4, text: 'Mark Newman' } },
-            { recid: 5, int: 350, money: 500, percent: 78, date: '4/1/2014', check: false },
-            { recid: 6, text: 'some text', int: 350, money: 440, percent: 59, date: '4/4/2014', check: false },
-            { recid: 7, int: 350, money: 790, percent: 39, date: '6/8/2014', check: false },
-            { recid: 8, int: 350, money: 4040, percent: 12, date: '11/3/2014', check: true },
-            { recid: 9, int: 1000, money: 3400, percent: 100, date: '2/1/2014',
-                style: 'background-color: #ffcccc', editable: false }
-        ]
-    });    
+  // Re-implement save and merge function because the built in implementation
+  // doesn't like field names with dashes in them
+  w2ui['grid'].save = function(){
+    changes = this.getChanges();
+    for (cIndex in this.getChanges()){
+      change = changes[cIndex];
+      record = this.get(change.recid);
+      for (item in change){
+        if(item != 'recid')
+          record[item] = change[item];
+      }
+      delete record.changes;
+    }
+  }
+  w2ui['grid'].refresh()
 }
 
 $(function () {
   initGrid();
   initTabs();
   initRegSettings();
-  initGraph();
   initTable();
+  initGraph();
   switchToTab("tab1",tabArr);
 });
