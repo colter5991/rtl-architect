@@ -28,6 +28,11 @@ var StateData = {
   getStateTransitionText(state){
     var text = "\t\t" + getCellText(state) + ' : begin\n'
     tList = graph.getConnectedLinks(state, {"outbound":true});
+    
+    // Trim out transitions with no target
+    tList = tList.filter(x=>{return x.getTargetElement() != null;});
+    
+    // Generate text
     for (tIndex in tList){
       t = tList[tIndex];
       condition = getCellText(t);
@@ -338,10 +343,16 @@ function initGraph(){
       case 46:
         deleteState(activeCell); break;
       case 83: // Letter s 
-        if (event.ctrlKey && event.shiftKey) newState(paperWidth/2,paperHeight/2, "NEW_STATE");
+        if (event.ctrlKey && event.shiftKey){
+          newState(paperWidth/2,paperHeight/2, "NEW_STATE");
+          event.preventDefault();
+        }
         break;
       case 65: // Letter a 
-        if (event.ctrlKey && event.shiftKey) newTransition({x:paperWidth/4,y:paperHeight/4},{x:paperWidth*3/4,y:paperHeight*3/4},'x==1 && y==0'); 
+        if (event.ctrlKey && event.shiftKey){
+          newTransition({x:paperWidth/4,y:paperHeight/4},{x:paperWidth*3/4,y:paperHeight*3/4},'x==1 && y==0'); 
+          event.preventDefault();
+        }
         break;
       case 8:
         editActiveCellString(null); break;
@@ -349,9 +360,12 @@ function initGraph(){
   });
 
   $("#paper").on("keypress", function(event){
+    console.log(event);
     if ((event.keyCode || event.which) == 32)
       event.preventDefault();
-    editActiveCellString(String.fromCharCode(event.which));
+    str = String.fromCharCode(event.keyCode || event.which)
+    if (event.key.length == 1)
+      editActiveCellString(event.key);
   })
 };
 

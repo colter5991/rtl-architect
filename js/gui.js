@@ -8,10 +8,14 @@ var mainContent = `
   <div id="tabs-content" style="height: 600px; padding: 10px; border: 1px solid #ccc; border-top: 0px">
     <div id="tab1-content">
       <h1>Next State Logic</h1>
+      <p>Use ctrl+shift+s to add a new state and ctrl+shift+a to add a new transition</p>
+      <p>Click a state/transition to make it active (highlighed in blue)</p>
+      <p>Press 'delete' to delete the active transition. Type or use backspace to edit the state name or transition condition </p>
       <div id="paper" class="paper" tabindex="0"></div>
     </div>
     <div id="tab2-content">
       <h1>State Register</h1>
+      <p>Edit the flip-flop settings</p>
       <div id="regForm">
         <div class="w2ui-field w2ui-span8"  style="clear: both">
           <label>Clock Edge: </label>
@@ -35,6 +39,11 @@ var mainContent = `
     </div>
     <div id="tab3-content">
       <h1>Output Logic</h1>
+      <p>Click 'Add Record' to add a new output variable</p>
+      <p>Specify the value for each output variable for each state.  Using all constants results in a Moore machine, and using expressions
+      dependent on input variables results in a mealy machine.</p>
+      <p>An output variable will assume the default value for all states in which the value is not specified</p>
+      
       <div id="grid" style="width: 100%; height: 400px;"></div>
     </div>
   </div>   
