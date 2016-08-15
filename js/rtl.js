@@ -30,7 +30,7 @@ var StateData = {
     tList = graph.getConnectedLinks(state, {"outbound":true});
     
     // Trim out transitions with no target
-    tList = tList.filter(x=>{return x.getTargetElement() != null;});
+    tList = tList.filter(function(x){return x.getTargetElement() != null;});
     
     // Generate text
     for (tIndex in tList){
@@ -339,6 +339,7 @@ function initGraph(){
   });
 
   $("#paper").on("keydown", function(event){
+    console.log(event.originalEvent)
     switch(event.which){
       case 46:
         deleteState(activeCell); break;
@@ -360,7 +361,6 @@ function initGraph(){
   });
 
   $("#paper").on("keypress", function(event){
-    console.log(event);
     if ((event.keyCode || event.which) == 32)
       event.preventDefault();
     str = String.fromCharCode(event.keyCode || event.which)

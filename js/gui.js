@@ -154,7 +154,7 @@ function initRegSettings(){
 function updateRegForm(){
   itemList = []
   //nameList = Object.keys(StateData.stateDict)
-  nameList = graph.getElements().map(x => getCellText(x));
+  nameList = graph.getElements().map(function (x) {getCellText(x)});
   for (index in nameList){
     state = nameList[index];
     itemList.push({id:state, name:state})
