@@ -224,4 +224,5 @@ $(function () {
   initTable();
   initGraph();
   switchToTab("tab1",tabArr);
+  alert('Warning! State Machine Designer has only been tested on Chrome and Firefox.  It might not work properly in other browsers!');
 });
