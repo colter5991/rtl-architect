@@ -1,3 +1,7 @@
+/*****************************************************************************
+ * HTML
+ *****************************************************************************/
+
 var topContent = `
   <h1 class="title">State Machine Designer</h1>
   <h2 class="title">(v0.0.0)</h2>
@@ -56,11 +60,15 @@ var rightContent = `
   </div>
 `
 
+/*****************************************************************************
+ * Global variables
+ *****************************************************************************/
+
 var tabArr = ["tab1", "tab2", "tab3"];
 
-var tabContent = `
-
-`
+/*****************************************************************************
+ * Functions
+ *****************************************************************************/
 
 function initGrid(){
     var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
@@ -151,11 +159,12 @@ function initRegSettings(){
 
 function updateRegForm(){
   itemList = []
-  nameList = graph.getElements().map(function (x) {getCellText(x)});
+  nameList = graph.getElements().map(getCellText);
   for (index in nameList){
     state = nameList[index];
-    itemList.push({id:state, name:state})
+    itemList.push({id:state, name:state, text:state})
   }
+  console.log(itemList)
   
   w2ui['regForm'].fields[2].options.items = itemList
 }
@@ -212,6 +221,10 @@ function initTable() {
   }
   w2ui['grid'].refresh()
 }
+
+/*****************************************************************************
+ * Initialize everything
+ *****************************************************************************/
 
 $(function () {
   initGrid();
