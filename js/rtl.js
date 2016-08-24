@@ -1,4 +1,19 @@
+/*****************************************************************************
+ * Global variables
+ *****************************************************************************/
+var graph;        // The joint.dia.Graph object
+var paper;        // The joint.dia.Paper object
+var activeCell;   // The active JointJs cell object
+var StateData;
 
+/*****************************************************************************
+ * Global functions
+ *****************************************************************************/
+ var initGraph;
+ var getCellText;
+
+
+(function() {
 /*****************************************************************************
  * Constants
  *****************************************************************************/
@@ -8,17 +23,10 @@ var paperWidth = 800;
 var paperHeight = 600;
 
 /*****************************************************************************
- * Global variables
- *****************************************************************************/
-var graph;        // The joint.dia.Graph object
-var paper;        // The joint.dia.Paper object
-var activeCell;   // The active JointJs cell object
-
-/*****************************************************************************
  * Object definitions
  *****************************************************************************/
 
-var StateData = {
+StateData = {
   edge : "Positive",      // Whether the clock edge is positive, negative, or both
   reset : "Active High",  // Whether the reset signal is active high or active low
   init : "",              // The name of the initial state
@@ -262,7 +270,7 @@ function setCellText(state, text){
 }
 
 // Get the text of the given cell
-function getCellText(state){
+getCellText = function(state){
   if(!state)
     return null;
   if(state.attributes.type == "fsa.State")
@@ -297,7 +305,7 @@ function newTransition(source, target, name){
 /*****************************************************************************
  * Initialization code
  *****************************************************************************/
-function initGraph(){
+initGraph = function(){
   graph = new joint.dia.Graph();
   paper = new joint.dia.Paper({
       el: $('#paper'),
@@ -339,7 +347,6 @@ function initGraph(){
   });
 
   $("#paper").on("keydown", function(event){
-    console.log(event.originalEvent)
     switch(event.which){
       case 46:
         deleteState(activeCell); break;
@@ -361,6 +368,7 @@ function initGraph(){
   });
 
   $("#paper").on("keypress", function(event){
+    console.log(event.originalEvent)
     if ((event.keyCode || event.which) == 32)
       event.preventDefault();
     str = String.fromCharCode(event.keyCode || event.which)
@@ -368,5 +376,5 @@ function initGraph(){
       editActiveCellString(event.key);
   })
 };
-
+})();
 

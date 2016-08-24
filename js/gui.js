@@ -171,7 +171,6 @@ function initTable() {
           toolbarSave: false,
       },
       columns: [                
-          { field: 'recid', caption: 'ID', size: '50px', sortable: true, resizable: true },
           { field: 'variable', caption: 'Variable Name', size: '120px', sortable: true, resizable: true, 
               editable: { type: 'text' }
           },
