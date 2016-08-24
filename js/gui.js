@@ -64,7 +64,11 @@ var rightContent = `
  * Global variables
  *****************************************************************************/
 
-var tabArr = ["tab1", "tab2", "tab3"];
+var tabArr = [
+  {name:"tab1", onSwitch: function(){}},
+  {name:"tab2", onSwitch: updateRegForm},
+  {name:"tab3", onSwitch: updateGrid}
+];
 
 /*****************************************************************************
  * Functions
@@ -98,16 +102,17 @@ function initGrid(){
   
 function switchToTab(currentTab, tabArr){
   for (var tabIndex in tabArr ){
-    var tab = tabArr[tabIndex];
+    var tab = tabArr[tabIndex].name;
     tabObject = $('#'+tab+"-content");
     if (tab == currentTab){
       tabObject.css("display", "block");
+      tabArr[tabIndex].onSwitch();
     }
     else{
       tabObject.css("display", "none");
-      updateRegForm();
-      w2ui['regForm'].refresh();
-      w2ui['grid'].refresh();
+      //updateRegForm();
+      //w2ui['regForm'].refresh();
+      //w2ui['grid'].refresh();
     }
   }
   if(currentTab == "tab1"){
@@ -164,9 +169,8 @@ function updateRegForm(){
     state = nameList[index];
     itemList.push({id:state, name:state, text:state})
   }
-  console.log(itemList)
-  
   w2ui['regForm'].fields[2].options.items = itemList
+  w2ui['regForm'].refresh()
 }
 
 function initTable() {
@@ -220,6 +224,23 @@ function initTable() {
     }
   }
   w2ui['grid'].refresh()
+}
+
+
+// This should be called whenever the grid tab is opened.  It updates the state names.
+function updateGrid(){
+  stateList = graph.getElements()
+  var stateDict = {};
+  for (index in stateList){
+    state = stateList[index];
+    stateDict[state.id] = getCellText(state);
+  }
+  for (columnIndex in w2ui['grid'].columns.slice(0,-2)){
+    columnIndex = Number(columnIndex)+2;
+    w2ui['grid'].columns[columnIndex].caption = stateDict[w2ui['grid'].columns[columnIndex].field];
+  }
+  w2ui['grid'].refresh();
+  
 }
 
 /*****************************************************************************
