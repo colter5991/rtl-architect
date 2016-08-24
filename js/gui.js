@@ -68,26 +68,24 @@ function initGrid(){
         name: 'layout',
         panels: [
             { type: 'top',  size: 60, resizable: true, style: pstyle, content: topContent },
-            { type: 'main', style: pstyle, content: mainContent },
+            { type: 'main', style: pstyle, content: mainContent,
+              tabs: {
+                name: 'tabs',
+                active: 'tab1',
+                tabs: [
+                  { id: 'tab1', caption: 'Next State Logic' },
+                  { id: 'tab2', caption: 'State Register'},
+                  { id: 'tab3', caption: 'Output Logic'},
+                ],
+                onClick: function (event) {
+                  switchToTab(event.target, tabArr);
+                }
+              }
+            },
             { type: 'right', size: 400, resizable: true, style: pstyle, content: rightContent },
             { type: 'bottom', size: 50, resizable: true, style: pstyle, content: 'bottom' }
         ]
     });
-}
-
-function initTabs(){
-  $('#tabs').w2tabs({
-    name: 'tabs',
-    active: 'tab1',
-    tabs: [
-      { id: 'tab1', caption: 'Next State Logic' },
-      { id: 'tab2', caption: 'State Register'},
-      { id: 'tab3', caption: 'Output Logic'},
-    ],
-    onClick: function (event) {
-      switchToTab(event.target, tabArr);
-    }
-  });
 }
   
 function switchToTab(currentTab, tabArr){
@@ -217,7 +215,6 @@ function initTable() {
 
 $(function () {
   initGrid();
-  initTabs();
   initRegSettings();
   initTable();
   initGraph();
