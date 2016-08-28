@@ -17,13 +17,10 @@ html,body {
   display: inline;
 }
 
+.title-section {
+  text-align: center;
+}
+
 h2.title{
   color: #888888;
 }
-
-/*
-#tab1-content{
-  color: ##ff0000;
-  overflow: scroll;
-}
-*/

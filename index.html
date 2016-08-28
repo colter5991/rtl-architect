@@ -2,29 +2,37 @@
 <meta charset="UTF-8"> 
 <html>
   <head>
-    <title>RTL Architect</title>
-    <link href="css/style.css" rel="stylesheet" type="text/css">
-    <!--MPL 2.0 License-->
-  	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/0.9.10/joint.min.css" />
-    <!--MIT License-->
-  	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-  	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.15.0/lodash.min.js"></script>
-  	<script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.3.3/backbone-min.js"></script>
-  	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.14.0/babel.min.js"></script>
-    <!--MPL 2.0 License-->
-  	<script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/0.9.10/joint.min.js"></script>
-  	<script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/0.9.10/joint.shapes.fsa.min.js"></script>
-  	<!--CC 4.0 License-->
-  	<script src="https://npmcdn.com/react@15.3.1/dist/react-with-addons.js"></script>
-  	<script src="https://npmcdn.com/react-dom@15.3.1/dist/react-dom.js"></script>
-    <!--Source Files-->
-    <script type="text/jsx" src="js/gui.js"></script>
-    <script src="js/rtl.js"></script>
-    <script> SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) { return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM()); };</script>
+	<title>RTL Architect</title>
+	<link href="css/style.css" rel="stylesheet" type="text/css">
+	<!--MPL 2.0 License-->
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/0.9.10/joint.min.css" />
+	<!--MIT License-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.15.0/lodash.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.3.3/backbone-min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.14.0/babel.min.js"></script>
+	<!--MPL 2.0 License-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/0.9.10/joint.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/0.9.10/joint.shapes.fsa.min.js"></script>
+	<!--CC 4.0 License-->
+	<script src="https://npmcdn.com/react@15.3.1/dist/react-with-addons.js"></script>
+	<script src="https://npmcdn.com/react-dom@15.3.1/dist/react-dom.js"></script>
+
+  	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/w2ui/1.4.3/w2ui.min.css" />
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/w2ui/1.4.3/w2ui.min.js"></script>
+	<!--Source Files-->
+	<script type="text/jsx" src="js/gui.jsx"></script>
+	<script src="js/rtl.js"></script>
+	<script> SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) { return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM()); };</script>
 
 
   </head>
   <body>
-    <div class="w2ui-layout" name="layout" id="layout" style="height: 99vh;"></div>
+	<div class="title-section">
+		<h1 class="title">RTL Architect</h1>
+		<h2 class="title">(v0.0.1)</h2>
+	</div>
+
+	<div id="application" style="height: 99vh;"></div>
   </body>
 </html>
