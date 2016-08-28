@@ -12,9 +12,7 @@ var mainContent = `
   <div id="tabs-content" style="height: 600px; padding: 10px; border: 1px solid #ccc; border-top: 0px">
     <div id="tab1-content">
       <h2>Next State Logic</h2>
-      <p>Use ctrl+shift+s to add a new state and ctrl+shift+a to add a new transition</p>
-      <p>Click a state/transition to make it active (highlighed in blue)</p>
-      <p>Press 'delete' to delete the active transition. Type or use backspace to edit the state name or transition condition </p>
+	  <hr>
       <div id="paper" class="paper" tabindex="0"></div>
     </div>
     <div id="tab2-content">
