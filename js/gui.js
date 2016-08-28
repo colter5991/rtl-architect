@@ -3,15 +3,15 @@
  *****************************************************************************/
 
 var topContent = `
-  <h1 class="title">State Machine Designer</h1>
-  <h2 class="title">(v0.0.0)</h2>
+  <h1 class="title" style="text-align: center;">RTL Architect</h1>
+  <h2 class="title" style="text-align: center;">(v0.0.1)</h2>
 `
 
 var mainContent = `
   <div id="tabs"></div>
   <div id="tabs-content" style="height: 600px; padding: 10px; border: 1px solid #ccc; border-top: 0px">
     <div id="tab1-content">
-      <h1>Next State Logic</h1>
+      <h2>Next State Logic</h2>
       <p>Use ctrl+shift+s to add a new state and ctrl+shift+a to add a new transition</p>
       <p>Click a state/transition to make it active (highlighed in blue)</p>
       <p>Press 'delete' to delete the active transition. Type or use backspace to edit the state name or transition condition </p>
@@ -79,7 +79,7 @@ function initGrid(){
     $('#layout').w2layout({
         name: 'layout',
         panels: [
-            { type: 'top',  size: 60, resizable: true, style: pstyle, content: topContent },
+            { type: 'top',  size: 45, resizable: false, style: pstyle + ' text-align: center', content: topContent },
             { type: 'main', style: pstyle, content: mainContent,
               tabs: {
                 name: 'tabs',
@@ -95,7 +95,6 @@ function initGrid(){
               }
             },
             { type: 'right', size: 400, resizable: true, style: pstyle, content: rightContent },
-            { type: 'bottom', size: 50, resizable: true, style: pstyle, content: 'bottom' }
         ]
     });
 }
@@ -253,5 +252,4 @@ $(function () {
   initTable();
   initGraph();
   switchToTab("tab1",tabArr);
-  alert('Warning! State Machine Designer has only been tested on Chrome and Firefox.  It might not work properly in other browsers!');
 });

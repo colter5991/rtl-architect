@@ -1,25 +1,28 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <meta charset="UTF-8"> 
 <html>
   <head>
-    <title>State Machine Designer</title>
+    <title>RTL Architect</title>
     <link href="css/style.css" rel="stylesheet" type="text/css">
+    <!--MPL 2.0 License-->
     <link rel="stylesheet" type="text/css" href="css/joint.css" />
+    <!--MIT License-->
     <link rel="stylesheet" type="text/css" href="css/w2ui-1.4.3.min.css" />
     <script src="js/jquery.min.js"></script>
     <script src="js/lodash.min.js"></script>
     <script src="js/backbone-min.js"></script>
+    <script src="js/w2ui-1.4.3.min.js"></script>
+    <!--MPL 2.0 License-->
     <script src="js/joint.min.js"></script>
     <script src="js/joint.shapes.fsa.js"></script>
-    <script src="js/w2ui-1.4.3.min.js"></script>   
-    <script src="js/gui.js"></script>   
+    <!--Source Files-->
+    <script src="js/gui.js"></script>
     <script src="js/rtl.js"></script>
-    <script src="js/joint.min.js"></script>
     <script> SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(toElement) { return toElement.getScreenCTM().inverse().multiply(this.getScreenCTM()); };</script>
-    
-    
+
+
   </head>
   <body>
-    <div class="w2ui-layout" name="layout" id="layout" style="height: 95vh;"></div>
+    <div class="w2ui-layout" name="layout" id="layout" style="height: 99vh;"></div>
   </body>
 </html>
