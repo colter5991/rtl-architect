@@ -1,1 +1,3 @@
 lib
+host.py
+js/babel.min.js
