@@ -1,5 +1,3 @@
-import SplitPane from '../lib/SplitPane';
-
 /*****************************************************************************
  * HTML
  *****************************************************************************/
@@ -12,7 +10,7 @@ const BodyPane = () => {
 			<div id="tabs-content" style="height: 600px; padding: 10px; border: 1px solid #ccc; border-top: 0px">
 				<div id="tab1-content">
 				  <h2>Next State Logic</h2>
-				  <hr>
+				  <hr />
 				  <div id="paper" class="paper" tabindex="0"></div>
 				</div>
 				<div id="tab2-content">
@@ -22,19 +20,19 @@ const BodyPane = () => {
 					<div class="w2ui-field w2ui-span8"  style="clear: both">
 					  <label>Clock Edge: </label>
 					  <div>
-						<input name="edge" type="text" maxlength="100" style="width: 300px !important">
+						<input name="edge" type="text" maxlength="100" style="width: 300px !important"></input>
 					  </div>
 					</div>
 					<div class="w2ui-field w2ui-span8" >
 					  <label>Reset: </label>
 					  <div>
-						<input name="reset" type="text" maxlength="100" style="width: 300px !important">
+						<input name="reset" type="text" maxlength="100" style="width: 300px !important"></input>
 					  </div>
 					</div>
 					<div class="w2ui-field w2ui-span8" >
 					  <label>Initial State: </label>
 					  <div>
-						<input name="init" type="text" maxlength="100" style="width: 300px !important">
+						<input name="init" type="text" maxlength="100" style="width: 300px !important"></input>
 					  </div>
 					</div>
 				  </div>
@@ -51,7 +49,7 @@ const BodyPane = () => {
 		</div>
 		<div>
 			<h2>Verilog Code</h2>
-			<hr>
+			<hr />
 			<div id="verilog"></div>
 		</div>
 		</SplitPane>
@@ -252,4 +250,4 @@ $(function () {
   switchToTab("tab1",tabArr);
 });
 
-React.render(<BodyPane />, document.getElementById("#application")
+ReactDOM.render(<BodyPane />, document.getElementById("application"));
