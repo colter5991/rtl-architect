@@ -1,0 +1,40 @@
+{
+  "name": "rtl-architect",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"webpack": "webpack",
+		"webpack-prd": "webpack -p"
+	},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colter5991/rtl-architect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/colter5991/rtl-architect/issues"
+  },
+  "homepage": "https://github.com/colter5991/rtl-architect#readme",
+  "devDependencies": {
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-react": "^6.22.0",
+    "file-loader": "^0.10.0",
+    "react-hot-loader": "^1.3.1",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.3.0",
+    "webpack-hot-middleware": "^2.16.1"
+  },
+  "dependencies": {
+    "babel-preset-env": "^1.1.8",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-react": "^6.22.0",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  }
+}
