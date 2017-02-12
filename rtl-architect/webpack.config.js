@@ -14,7 +14,7 @@ module.exports = {
 	entry: [
 		'webpack-dev-server/client?http://0.0.0.0:9000', // WebpackDevServer host and port
 		'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
-		"./src/js/jsx1"
+		"./src/js/index"
 	],
 	output: {
 		filename: "dist/bundle.js"
@@ -38,6 +38,9 @@ module.exports = {
 	resolve: {
 		// you can now require('file') instead of require('file.coffee')
 		extensions: ['.js', '.json', '.jsx'],
-		modules: ["node_modules", path.resolve('./src/js'), path.resolve('./src/lib'), path.resolve('./src/css')]
+		modules: ["node_modules", path.resolve('./src/js'), path.resolve('./src/lib'), path.resolve('./src/css')],
+		alias: {
+			"underscore": "lodash",
+		}
 	}
 };
