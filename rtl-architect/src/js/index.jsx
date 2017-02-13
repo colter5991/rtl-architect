@@ -2,6 +2,9 @@
  * Loads
  *****************************************************************************/
 
+// MIT License
+import Bootstrap from 'bootstrap/dist/css/bootstrap.css';
+
 // BSD License
 import React from 'react';
 import ReactDOM from 'react-dom';
