@@ -1,9 +1,9 @@
 ﻿var React = require('react');
-var ReactDOM = require('react-dom');
+var ReactDom = require('react-dom');
 
 import Hello from './hello';
 
-ReactDOM.render(
+ReactDom.render(
 	<Hello />,
 document.getElementById('root')
 );

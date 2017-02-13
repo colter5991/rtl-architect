@@ -9,6 +9,6 @@ class Hello extends React.Component {
 			<h1>Hello Worlds</h1>
 		);
 	}
-}
+};
 
 export default Hello;
