@@ -4,6 +4,7 @@
 
 // MIT License
 import Bootstrap from 'bootstrap/dist/css/bootstrap.css';
+import Jumbotron from 'react-bootstrap/lib/Jumbotron';
 
 // BSD License
 import React from 'react';
@@ -13,7 +14,8 @@ import ReactDOM from 'react-dom';
 import joint from 'jointjs';
 
 // My loads
-import BodyPane from './gui';
+import BodyPane from './BodyPane';
+import 'main.css';
 
 /*****************************************************************************
  * Global variables
@@ -29,6 +31,13 @@ var StateData;
 var initGraph;
 var getCellText;
 
+const Title = () => {
+	return (
+		<div className="title-text">
+			<Jumbotron><h1>RTL Architect</h1></Jumbotron>
+		</div>
+    );
+};
 
 //(function () {
 //	/*****************************************************************************
@@ -599,4 +608,5 @@ var getCellText;
 //	//switchToTab("tab1", tabArr);
 //});
 
+ReactDOM.render(<Title />, document.getElementById("title-text"));
 ReactDOM.render(<BodyPane />, document.getElementById("application"));

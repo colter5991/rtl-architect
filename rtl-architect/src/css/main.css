@@ -1,0 +1,11 @@
+﻿.title-text .jumbotron {
+	text-align: center;
+	padding: 15px;
+	margin: 0px;
+	border-bottom: 1px solid lightgray;
+}
+
+.title-text h1 {
+	padding: 0px;
+	margin: 0px;
+}
