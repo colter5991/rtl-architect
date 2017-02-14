@@ -5,6 +5,8 @@ import React from "react";
 import SplitPane from "react-split-pane";
 import "SplitPane.css";
 import Button from "react-bootstrap/lib/Button";
+import jQuery from "jquery";
+window.$ = window.jQuery = jQuery;
 
 // My Loads
 import "BodyPane.css";
@@ -22,7 +24,7 @@ class BodyPane extends React.Component {
 		this.PAPERWIDTH = 800;
 		this.PAPERHEIGHT = 600;
 
-		this.graph = new JointGraph(); // An IGraph object
+		this.graph = new JointGraph(this.PAPERWIDTH, this.PAPERHEIGHT, this._handleCellClick, this._handleNothingClick); // An IGraph object
 		this.verilog_converter = new VerilogConverter(this.graph);
 		this.state = {
 			edge: "Positive",      // Whether the clock edge is positive, negative, or both
@@ -34,7 +36,7 @@ class BodyPane extends React.Component {
 	}
 
 	_updateVerilog() {
-		this.setState({ verilog_text: this.verilog_converter.Update(this.edge, this.reset, this.initial_state) });
+		this.setState({ verilog_text: this.verilog_converter.Update(this.state.edge, this.state.reset, this.state.initial_state) });
 	}
 
 	_newState(xpos, ypos, name) {
@@ -51,6 +53,8 @@ class BodyPane extends React.Component {
 			record = recordList[index];
 			record[state.id] = "";
 		}
+
+		return state;
 	}
 
 	_deleteState(state) {
@@ -81,7 +85,80 @@ class BodyPane extends React.Component {
 	}
 
 	_newTransition(source, target, name) {
-		return this.graph.NewTransition(source, target, name, this._updateVerilog);
+		return this.graph.NewTransition(source, target, name, this._handleCellChangeSource, this._handleCellChangeTarget);
+	}
+
+	// Handle changes in the source of the transition
+	_handleCellChangeSource() {
+		this._updateVerilog();
+	}
+
+	// Handle changes in the  target of the transition
+	_handleCellChangeTarget() {
+		this._updateVerilog();
+	}
+
+	// Handle clicks (mainly select active element)
+	_handleCellClick(cell_view) {
+		$("#paper").focus();
+		this._clearActiveCell();
+		const cell = this.graph.HandleCellClick(cell_view, this.ACTIVE_COLOR);
+		this.setState({active_cell: cell});
+	}
+
+	// Handle clicking on nothing
+	_handleNothingClick() {
+		$("#paper").focus();
+		this._clearActiveCell();
+	}
+
+	_initGraph() {
+		s1 = this._newState(100, 100, "FOO");
+		s2 = this._newState(100, 400, "BAR");
+		s3 = this._newState(400, 100, "FOO_2");
+		s4 = this._newState(400, 400, "BAR_2");
+
+		this._newTransition(s1, s2, "(x == y) || (z < w)");
+		this._newTransition(s4, s3, "z[2] == x");
+		this._newTransition(s3, s1, "(z[2] == y) && (x != y)");
+		this._newTransition(s2, s4, "w & z & !x");
+		this._newTransition(s4, s1, "z | w | (z ^ x)");
+		this._updateVerilog();
+
+
+		/*****************************************************************************
+		* Event handlers
+		*****************************************************************************/
+
+		$("#paper").on("keydown", function (event) {
+			switch (event.which) {
+				case 46: // Delete key
+					this._deleteState(this.state.active_cell); break;
+				case 83: // Letter s 
+					if (event.ctrlKey && event.shiftKey) {
+						this._newState(this.PAPERWIDTH / 2, this.PAPERHEIGHT / 2, "NEW_STATE");
+						event.preventDefault();
+					}
+					break;
+				case 65: // Letter a 
+					if (event.ctrlKey && event.shiftKey) {
+						this._newTransition({ x: this.PAPERWIDTH / 4, y: this.PAPERHEIGHT / 4 }, { x: this.PAPERWIDTH * 3 / 4, y: this.PAPERHEIGHT * 3 / 4 }, 'x==1 && y==0');
+						event.preventDefault();
+					}
+					break;
+				case 8:
+					this._editActiveCellString(null); break;
+			}
+		});
+
+		$("#paper").on("keypress", function(event) {
+			console.log(event.originalEvent);
+			if ((event.keyCode || event.which) == 32)
+				event.preventDefault();
+			str = String.fromCharCode(event.keyCode || event.which);
+			if (event.key.length == 1)
+				this._editActiveCellString(event.key);
+		});
 	}
 
 	render() {

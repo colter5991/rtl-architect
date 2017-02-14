@@ -1,4 +1,8 @@
-﻿// MPL 2.0 License
+﻿// MIT License
+import jQuery from "jquery";
+window.$ = window.jQuery = jQuery;
+
+// MPL 2.0 License
 import Joint from "jointjs";
 
 // My Loads
@@ -6,8 +10,18 @@ import IGraph from "./IGraph";
 
 class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
-	constructor() {
+	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler) {
 		this.graph = new Joint.dia.Graph();
+		this.paper = new Joint.dia.Paper({
+			el: $('#paper'),
+			width: paper_width,
+			height: paper_height,
+			gridSize: 1,
+			model: this.graph
+		});
+
+		this.paper.on('cell:pointerdown', cell_click_handler);
+		this.paper.on('blank:pointerdown', nothing_click_handler);
 	}
 
 	/*****************************************************************************
@@ -72,12 +86,12 @@ class JointGraph extends IGraph {
 	}
 
 	// Set the stroke of the given cell to the given color
-	SetCellStroke(state, stroke, active_cell) {
+	SetCellStroke(state, stroke) {
 		if (state.attributes.type == "fsa.State") {
 			state.attr("circle/stroke", stroke);
 		}
 		else {
-			active_cell.attr({ '.connection': { stroke: stroke } });
+			state.attr({ '.connection': { stroke: stroke } });
 		}
 	}
 
@@ -90,7 +104,7 @@ class JointGraph extends IGraph {
 	}
 
 	// Make a new link
-	NewTransition(source, target, name, callback) {
+	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target) {
 
 		var cell = new Joint.shapes.fsa.Arrow({
 			source: source,
@@ -98,11 +112,16 @@ class JointGraph extends IGraph {
 			labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }],
 		});
 
-		cell.on("change:source", function () { callback(); });
-		cell.on("change:target", function () { callback(); });
+		cell.on("change:source", handle_cell_change_source);
+		cell.on("change:target", handle_cell_change_target);
 
 		this.graph.addCell(cell);
 		return cell;
+	}
+
+	HandleCellClick(cell_view, active_color) {
+		this.SetCellStroke(cell_view.model, active_color);
+		return cell_view.model;
 	}
 }
 
