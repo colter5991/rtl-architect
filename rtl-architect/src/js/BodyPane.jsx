@@ -15,13 +15,21 @@ import JointGraph from "./JointGraph";
 class BodyPane extends React.Component {
 	constructor(props) {
 		super(props);
+
+		// Constants
+		this.INACTIVE_COLOR = "black"; // The outline color of inactive graph elements
+		this.ACTIVE_COLOR = "blue";    // outline color of the active element
+		this.PAPERWIDTH = 800;
+		this.PAPERHEIGHT = 600;
+
 		this.graph = new JointGraph(); // An IGraph object
 		this.verilog_converter = new VerilogConverter(this.graph);
 		this.state = {
 			edge: "Positive",      // Whether the clock edge is positive, negative, or both
 			reset: "Active High",  // Whether the reset signal is active high or active low
 			initial_state: "",     // The name of the initial state
-			verilog_text: ""       // The Verilog code that is shown in the verilog panel
+			verilog_text: "",      // The Verilog code that is shown in the verilog panel
+			active_cell: null      // The currently active cell object
 		};
 	}
 
@@ -58,6 +66,22 @@ class BodyPane extends React.Component {
 
 		this.graph.DeleteState(state);
 		this._updateVerilog();
+	}
+
+	_editActiveCellString(character) {
+		this.graph.EditActiveCellString(character, this.state.active_cell);
+		this._updateVerilog();
+	}
+
+	// inactivate the current active cell
+	_clearActiveCell() {
+		if (this.state.active_cell)
+			this.graph.SetCellStroke(this.state.active_cell, this.INACTIVE_COLOR);
+		this.setState({ active_cell: null });
+	}
+
+	_newTransition(source, target, name) {
+		return this.graph.NewTransition(source, target, name, this._updateVerilog);
 	}
 
 	render() {

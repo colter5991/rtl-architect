@@ -41,16 +41,16 @@ class JointGraph extends IGraph {
 	*****************************************************************************/
 
 	// Append the given character to the end of the active cell string
-	EditActiveCellString(character) {
-		if (activeCell == null) {
-			return
+	EditActiveCellString(character, active_cell) {
+		if (active_cell == null) {
+			return;
 		}
-		var text = this.GetCellText(activeCell);
+		var text = this.GetCellText(active_cell);
 		if (character)
-			text += character
+			text += character;
 		else if (text != "")
 			text = text.substring(0, text.length - 1);
-		this._setCellText(activeCell, text);
+		this._setCellText(active_cell, text);
 	}
 
 	// Create a new State View
@@ -72,45 +72,36 @@ class JointGraph extends IGraph {
 	}
 
 	// Set the stroke of the given cell to the given color
-	setCellStroke(state, stroke) {
+	SetCellStroke(state, stroke, active_cell) {
 		if (state.attributes.type == "fsa.State") {
 			state.attr("circle/stroke", stroke);
 		}
 		else {
-			activeCell.attr({ '.connection': { stroke: stroke } })
+			active_cell.attr({ '.connection': { stroke: stroke } });
 		}
 	}
 
 	// Set the text of the given cell to the given text
-	setCellText(state, text) {
+	_setCellText(state, text) {
 		if (state.attributes.type == "fsa.State")
-			activeCell.attr("text/text", text)
+			state.attr("text/text", text);
 		else
-			state.label(0, { attrs: { text: { text: text } } })
-
-		StateData.update();
-	}
-
-	// inactivate the current active cell
-	clearActiveCell() {
-		if (activeCell)
-			setCellStroke(activeCell, inactiveColor);
-		activeCell = null;
+			state.label(0, { attrs: { text: { text: text } } });
 	}
 
 	// Make a new link
-	newTransition(source, target, name) {
+	NewTransition(source, target, name, callback) {
 
-		var cell = new joint.shapes.fsa.Arrow({
+		var cell = new Joint.shapes.fsa.Arrow({
 			source: source,
 			target: target,
 			labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }],
 		});
 
-		cell.on("change:source", function () { StateData.update(); });
-		cell.on("change:target", function () { StateData.update(); });
+		cell.on("change:source", function () { callback(); });
+		cell.on("change:target", function () { callback(); });
 
-		graph.addCell(cell);
+		this.graph.addCell(cell);
 		return cell;
 	}
 }
