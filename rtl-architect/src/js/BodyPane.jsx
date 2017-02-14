@@ -35,6 +35,11 @@ class BodyPane extends React.Component {
 		};
 	}
 
+	componentDidMount() {
+		this._initTable();
+		this._initGraph();
+	}
+
 	_updateVerilog() {
 		this.setState({ verilog_text: this.verilog_converter.Update(this.state.edge, this.state.reset, this.state.initial_state) });
 	}
@@ -156,9 +161,85 @@ class BodyPane extends React.Component {
 			if ((event.keyCode || event.which) == 32)
 				event.preventDefault();
 			str = String.fromCharCode(event.keyCode || event.which);
-			if (event.key.length == 1)
+			if (event.key.length == 1) {
 				this._editActiveCellString(event.key);
+				this._updateGrid();
+			}
 		});
+	}
+
+	_initTable() {
+		const update = this._updateVerilog;
+		$('#grid').w2grid({
+			name: 'grid',
+			show: {
+				toolbar: true,
+				footer: false,
+				toolbarSave: false,
+			},
+			columns: [
+				{
+					field: 'variable', caption: 'Variable Name', size: '120px', sortable: true, resizable: true,
+					editable: { type: 'text' }
+				},
+				{
+					field: 'default', caption: 'Default Value', size: '120px', sortable: true, resizable: true,
+					editable: { type: 'text' }
+				},
+			],
+			toolbar: {
+				items: [
+					{ id: 'add', type: 'button', caption: 'Add Record', icon: 'w2ui-icon-plus' }
+				],
+				onClick: function (event) {
+					if (event.target == 'add') {
+						w2ui.grid.add({ recid: w2ui.grid.records.length + 1, variable: "VAR" + (w2ui.grid.records.length + 1), 'default': 0 });
+					}
+				}
+			},
+			records: [
+				{ recid: 1, variable: 'Y', default: 0 },
+			],
+
+			onChange: function (event) {
+				event.onComplete = function (event) {
+					this.save();
+					update();
+				}
+			}
+		});
+
+		// Re-implement save and merge function because the built in implementation
+		// doesn't like field names with dashes in them
+		w2ui['grid'].save = function () {
+			changes = this.getChanges();
+			for (cIndex in this.getChanges()) {
+				change = changes[cIndex];
+				record = this.get(change.recid);
+				for (item in change) {
+					if (item != 'recid')
+						record[item] = change[item];
+				}
+				delete record.changes;
+			}
+		}
+		w2ui['grid'].refresh();
+	}
+
+	// This should be called whenever the grid tab is opened. It updates the state names.
+	// TO BE REMOVED
+	_updateGrid() {
+		stateList = this.graph.graph.getElements();
+		var stateDict = {};
+		for (index in stateList) {
+			state = stateList[index];
+			stateDict[state.id] = this.graph.GetCellText(state);
+		}
+		for (columnIndex in w2ui['grid'].columns.slice(0, -2)) {
+			columnIndex = Number(columnIndex) + 2;
+			w2ui['grid'].columns[columnIndex].caption = stateDict[w2ui['grid'].columns[columnIndex].field];
+		}
+		w2ui['grid'].refresh();
 	}
 
 	render() {
@@ -169,23 +250,15 @@ class BodyPane extends React.Component {
 				<div className="window">
 						<h2>Next State Logic</h2>
 						<div id="paper" className="paper"></div>
+						<div id="grid"></div>
 				</div>
 				<div className="window">
 					<h2>Verilog Code</h2>
-					<div id="verilog"></div>
+					<div id="verilog">{this.state.verilog_text}</div>
 				</div>
 			</SplitPane>
 		);
 	}
 };
-
-//<div>
-//						<h2>Output Logic</h2>
-//						<p>Click 'Add Record' to add a new output variable</p>
-//						<p>Specify the value for each output variable for each state.  Using all constants results in a Moore machine, and using expressions
-//						dependent on input variables results in a mealy machine.</p>
-//						<p>An output variable will assume the default value for all states in which the value is not specified</p>
-//						<div id="grid"></div>
-//					</div>
 
 export default BodyPane;
