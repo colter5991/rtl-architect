@@ -157,8 +157,7 @@
 	}
 
 	Update(edge, reset, initial_state) {
-		html = this._getVerilogHTML(edge, reset, initial_state);
-		document.getElementById("verilog").innerHTML = html;
+		return this._getVerilogHTML(edge, reset, initial_state);
 	}
 }
 
