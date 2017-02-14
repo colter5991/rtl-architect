@@ -7,8 +7,12 @@ import Joint from "jointjs";
 // MIT License
 import SplitPane from "react-split-pane";
 import "SplitPane.css";
-import "BodyPane.css";
 import Button from "react-bootstrap/lib/Button";
+
+// My loads
+import "BodyPane.css";
+import VerilogConverter from "./VerilogConverter";
+import JointGraph from "./JointGraph";
 
 // ReSharper disable once PossiblyUnassignedProperty
 class BodyPane extends React.Component {
@@ -17,8 +21,8 @@ class BodyPane extends React.Component {
 		this.state = {
 			edge: "Positive",      // Whether the clock edge is positive, negative, or both
 			reset: "Active High",  // Whether the reset signal is active high or active low
-			init: "",              // The name of the initial state
-			graph: new Joint.dia.Graph()
+			initial_state: "",              // The name of the initial state
+			verilog_converter: new VerilogConverter(new JointGraph(Joint.dia.Graph()))
 		};
 	},
 	// Get the transition text for a single state.  That is the case statement

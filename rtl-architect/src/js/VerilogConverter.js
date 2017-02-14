@@ -1,16 +1,13 @@
 ﻿class VerilogConverter {
-	constructor(edge, reset, initial_state, graph) {
-		this.edge = edge; // Whether the clock edge is positive, negative, or both
-		this.reset = reset; // Whether the reset signal is active high or active low
-		this.init = initial_state; // The name of the initial state
+	constructor(graph) {
 		this.graph = graph;
 	}
 
 	// Get the transition text for a single state.  That is the case statement
 	// block with the big ol' if/else if structure to choose the nextState.
 	_getStateTransitionText(state) {
-		var text = "\t\t" + getCellText(state) + ' : begin\n'
-		tList = this.graph.getConnectedLinks(state, { "outbound": true });
+		var text = "\t\t" + this.graph.GetCellText(state) + ' : begin\n'
+		tList = this.graph.GetConnectedLinks(state, { "outbound": true });
 
 		// Trim out transitions with no target
 		tList = tList.filter(function (x) { return x.getTargetElement() != null; });
@@ -18,8 +15,8 @@
 		// Generate text
 		for (tIndex in tList) {
 			t = tList[tIndex];
-			condition = getCellText(t);
-			target = getCellText(t.getTargetElement());
+			condition = this.graph.GetCellText(t);
+			target = this.graph.GetCellText(t.getTargetElement());
 			text += "\t\t\t"
 			if (tIndex != 0) { text += "else "; }
 			text += "if ( " + condition + " )\n"
@@ -32,7 +29,7 @@
 	// Function to get how many bits it takes to represent all of the states
 	// For example, 5 states require 3 bits to represent.
 	_getStateWidth() {
-		var length = this.graph.getElements().length;
+		var length = this.graph.GetElements().length;
 		if (length <= 2)
 			return 1;
 		else
@@ -41,7 +38,7 @@
 
 	// Return a string representing the bit range, for example "[3:0]"
 	_getBitRange() {
-		upperBit = this.getStateWidth() - 1;
+		upperBit = this._getStateWidth() - 1;
 		if (upperBit == 0)
 			return ""
 		else
@@ -49,11 +46,11 @@
 	}
 
 	_getEnumText() {
-		enumText = "typedef enum bit " + this.getBitRange() + " {\n"
-		stateList = this.graph.getElements()
+		enumText = "typedef enum bit " + this._getBitRange() + " {\n"
+		stateList = this.graph.GetElements()
 		for (stateIndex in stateList) {
 			state = stateList[stateIndex];
-			enumText += "\t" + getCellText(state) + ",\n"
+			enumText += "\t" + this.graph.GetCellText(state) + ",\n"
 		}
 		enumText = enumText.substring(0, enumText.length - 2) + "\n} StateType;\n\n";
 		enumText += 'StateType state;\n';
@@ -69,10 +66,10 @@
 		//for (stateName in this.stateDict){
 		//  text += this.stateDict[stateName].transitionText;
 		//}
-		stateList = this.graph.getElements()
+		stateList = this.graph.GetElements()
 		for (stateIndex in stateList) {
 			state = stateList[stateIndex];
-			text += this.getStateTransitionText(state);
+			text += this._getStateTransitionText(state);
 		}
 
 		text += "\tendcase\n"
@@ -80,17 +77,17 @@
 		return text;
 	}
 
-	_getFFText() {
+	_getFFText(edge, reset, initial_state) {
 		// Determine the edge of the clock
-		if (this.edge == "Positive")
+		if (edge == "Positive")
 			clockEdge = "posedge";
-		else if (this.edge == "Negative")
+		else if (edge == "Negative")
 			clockEdge = "negedge";
 		else
 			clockEdge = "";
 
 		// Determine the edge of the reset
-		if (this.reset == "Active High") {
+		if (reset == "Active High") {
 			resetEdge = "posedge";
 			resetCondition = "rst == 1";
 		}
@@ -101,7 +98,7 @@
 
 		text = "always_ff @(" + clockEdge + " clk, " + resetEdge + " rst) begin\n"
 		text += "\tif (" + resetCondition + ");\n";
-		text += "\t\tstate <= " + this.init + ";\n";
+		text += "\t\tstate <= " + initial_state + ";\n";
 		text += "\telse\n"
 		text += "\t\tstate <= nextState\n";
 		text += "end\n\n";
@@ -131,7 +128,7 @@
 		for (var stateID in stateDict) {
 			if (stateID == 'recid')
 				continue;
-			stateName = getCellText(this.graph.getCell(stateID));
+			stateName = this.graph.GetCellText(this.graph.GetCell(stateID));
 			text += "\t\t" + stateName + ": begin\n"
 			for (var variable in stateDict[stateID]) {
 				var expression = stateDict[stateID][variable];
@@ -146,12 +143,12 @@
 		return text;
 	}
 
-	GetVerilogHTML() {
+	_getVerilogHTML(edge, reset, initial_state) {
 		// Build up the text part by part
-		html = this.getEnumText();
-		html += this.getTransitionText();
-		html += this.getFFText();
-		html += this.getOutputText();
+		html = this._getEnumText();
+		html += this._getTransitionText();
+		html += this._getFFText(edge, reset, initial_state );
+		html += this._getOutputText();
 
 		// Convert to a nice html format
 		html = html.replace(new RegExp('\n', 'g'), '<br>');
@@ -159,8 +156,8 @@
 		return html;
 	}
 
-	Update() {
-		html = this.getVerilogHTML();
+	Update(edge, reset, initial_state) {
+		html = this._getVerilogHTML(edge, reset, initial_state);
 		document.getElementById("verilog").innerHTML = html;
 	}
 }
