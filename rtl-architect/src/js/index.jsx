@@ -1,4 +1,7 @@
-﻿/*****************************************************************************
+﻿// Pass along that the module loaded correctly
+window.MODULE_LOADED = true;
+
+/*****************************************************************************
  * Loads
  *****************************************************************************/
 
@@ -33,7 +36,7 @@ var getCellText;
 
 const Title = () => {
 	return (
-		<div className="title-text">
+		<div className="title-text" id="title-text">
 			<Jumbotron><h1>RTL Architect</h1></Jumbotron>
 		</div>
     );

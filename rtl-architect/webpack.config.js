@@ -10,27 +10,19 @@ var definePlugin = new webpack.DefinePlugin({
 	__PRERELEASE__: JSON.stringify(JSON.parse(process.env.BUILD_PRERELEASE || 'false'))
 });
 
-module.exports = {
+const config = {
 	entry: [
-		'webpack-dev-server/client?http://0.0.0.0:9000', // WebpackDevServer host and port
-		'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
 		"./src/js/index"
 	],
 	output: {
+		path: __dirname,
 		filename: "dist/bundle.js"
 	},
-	devServer: {
-		contentBase: ".",
-		host: "localhost",
-		port: 9000
-	},
 	plugins: [
-		new webpack.HotModuleReplacementPlugin(),
 		definePlugin
 	],
 	module: {
 		loaders: [
-			{ test: /\.jsx?$/, loaders: ['react-hot-loader', 'babel-loader?presets[]=es2015'], include: path.join(__dirname, 'src') },
 			{ test: /\.jsx?$/, loader: "babel-loader", query: { presets: ['es2015', 'react'] } },
 			{ test: /\.css$/, loader: 'style-loader!css-loader' },
 			{ test: /\.png$/, loader: "url-loader?limit=100000" },
@@ -46,7 +38,36 @@ module.exports = {
 		extensions: ['.js', '.json', '.jsx'],
 		modules: ["node_modules", path.resolve('./src/js'), path.resolve('./src/lib'), path.resolve('./src/css')],
 		alias: {
-			"underscore": "lodash",
+			"underscore": "lodash"
 		}
 	}
 };
+
+if (process.env.NODE_ENV === 'production') {
+	// Production mode
+	config.output.publicPath = '/';
+	//config.module.loaders.push({ test: /\.jsx?$/, loader: "babel-loader", query: { presets: ['es2015', 'react'] } });
+} else {
+	// Dev Mode
+
+	//config.devtool = "#cheap-module-source-map";
+	config.devServer = {
+		contentBase: ".",
+		host: "localhost",
+		port: 3000
+	};
+
+	config.plugins.push(
+		new webpack.HotModuleReplacementPlugin()
+	);
+
+	config.entry.push(
+		'webpack-dev-server/client?http://0.0.0.0:3000', // WebpackDevServer host and port
+		'webpack/hot/only-dev-server' // "only" prevents reload on syntax errors
+	);
+
+	config.output.publicPath = 'http://localhost:3000/';
+	//config.module.loaders.push({ test: /\.jsx?$/, loaders: ['react-hot-loader', 'babel-loader?presets[]=react,presets[]=es2015'] });
+}
+
+module.exports = config;
