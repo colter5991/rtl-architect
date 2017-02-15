@@ -6,12 +6,12 @@
 import Bootstrap from 'bootstrap/dist/css/bootstrap.css';
 import Jumbotron from 'react-bootstrap/lib/Jumbotron';
 
+//import jQuery from "jquery";
+//window.$ = window.jQuery = jQuery;
+
 // BSD License
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-// MPL 2.0 License
-import joint from 'jointjs';
 
 // My loads
 import BodyPane from './BodyPane';

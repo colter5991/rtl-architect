@@ -1,6 +1,6 @@
 ﻿// MIT License
-import jQuery from "jquery";
-window.$ = window.jQuery = jQuery;
+//import jQuery from "jquery";
+//window.$ = window.jQuery = jQuery;
 
 // MPL 2.0 License
 import Joint from "jointjs";
@@ -11,6 +11,7 @@ import IGraph from "./IGraph";
 class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
 	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler) {
+		super();
 		this.graph = new Joint.dia.Graph();
 		this.paper = new Joint.dia.Paper({
 			el: $('#paper'),
@@ -46,7 +47,7 @@ class JointGraph extends IGraph {
 	}
 
 	GetCell(state_id) {
-		return this.graph.GetCell(state_id);
+		return this.graph.getCell(state_id);
 	}
 
 

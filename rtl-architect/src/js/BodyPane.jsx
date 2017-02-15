@@ -5,8 +5,8 @@ import React from "react";
 import SplitPane from "react-split-pane";
 import "SplitPane.css";
 import Button from "react-bootstrap/lib/Button";
-import jQuery from "jquery";
-window.$ = window.jQuery = jQuery;
+//import jQuery from "jquery";
+//window.$ = window.jQuery = jQuery;
 
 // My Loads
 import "BodyPane.css";
@@ -53,9 +53,10 @@ class BodyPane extends React.Component {
 			editable: { type: 'text' }
 		});
 
-		recordList = w2ui['grid'].records;
-		for (index in recordList) {
-			record = recordList[index];
+		const record_list = w2ui['grid'].records;
+		let index;
+		for (index in record_list) {
+			const record = record_list[index];
 			record[state.id] = "";
 		}
 
@@ -118,10 +119,10 @@ class BodyPane extends React.Component {
 	}
 
 	_initGraph() {
-		s1 = this._newState(100, 100, "FOO");
-		s2 = this._newState(100, 400, "BAR");
-		s3 = this._newState(400, 100, "FOO_2");
-		s4 = this._newState(400, 400, "BAR_2");
+		const s1 = this._newState(100, 100, "FOO");
+		const s2 = this._newState(100, 400, "BAR");
+		const s3 = this._newState(400, 100, "FOO_2");
+		const s4 = this._newState(400, 400, "BAR_2");
 
 		this._newTransition(s1, s2, "(x == y) || (z < w)");
 		this._newTransition(s4, s3, "z[2] == x");
@@ -254,7 +255,7 @@ class BodyPane extends React.Component {
 				</div>
 				<div className="window">
 					<h2>Verilog Code</h2>
-					<div id="verilog">{this.state.verilog_text}</div>
+					<div id="verilog"><pre>{this.state.verilog_text}</pre></div>
 				</div>
 			</SplitPane>
 		);
