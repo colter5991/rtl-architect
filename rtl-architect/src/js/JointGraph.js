@@ -13,6 +13,7 @@ class JointGraph extends IGraph {
 	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler) {
 		super();
 		this.graph = new Joint.dia.Graph();
+		// document.getElementById("next-state").offsetWidth
 		this.paper = new Joint.dia.Paper({
 			el: $('#paper'),
 			width: paper_width,

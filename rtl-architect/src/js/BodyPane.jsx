@@ -24,8 +24,13 @@ class BodyPane extends React.Component {
 		this.PAPERWIDTH = 800;
 		this.PAPERHEIGHT = 600;
 
-		this.graph = new JointGraph(this.PAPERWIDTH, this.PAPERHEIGHT, this._handleCellClick, this._handleNothingClick); // An IGraph object
-		this.verilog_converter = new VerilogConverter(this.graph);
+		this._handleCellChangeSource = this._handleCellChangeSource.bind(this);
+		this._handleCellChangeTarget = this._handleCellChangeTarget.bind(this);
+		this._handleCellClick = this._handleCellClick.bind(this);
+		this._handleNothingClick = this._handleNothingClick.bind(this);
+
+		this.graph = null;
+		this.verilog_converter = null;
 		this.state = {
 			edge: "Positive",      // Whether the clock edge is positive, negative, or both
 			reset: "Active High",  // Whether the reset signal is active high or active low
@@ -36,6 +41,10 @@ class BodyPane extends React.Component {
 	}
 
 	componentDidMount() {
+		// This must be performed after the object has mounted
+		this.graph = new JointGraph(this.PAPERWIDTH, this.PAPERHEIGHT, this._handleCellClick, this._handleNothingClick); // An IGraph object
+		// This object relies on the previous being loaded
+		this.verilog_converter = new VerilogConverter(this.graph);
 		this._initTable();
 		this._initGraph();
 	}
@@ -248,7 +257,7 @@ class BodyPane extends React.Component {
 			<SplitPane split="vertical" minSize={100}
 					defaultSize={document.documentElement.clientWidth / 2}
 					primary="second">
-				<div className="window">
+				<div className="window" id="next-state">
 						<h2>Next State Logic</h2>
 						<div id="paper" className="paper"></div>
 						<div id="grid"></div>
