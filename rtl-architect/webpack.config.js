@@ -54,7 +54,7 @@ if (process.env.NODE_ENV === 'production') {
 	config.devServer = {
 		contentBase: ".",
 		host: "localhost",
-		port: 3000
+		port: 9000
 	};
 
 	config.plugins.push(
@@ -62,11 +62,11 @@ if (process.env.NODE_ENV === 'production') {
 	);
 
 	config.entry.push(
-		'webpack-dev-server/client?http://0.0.0.0:3000', // WebpackDevServer host and port
+		'webpack-dev-server/client?http://0.0.0.0:9000', // WebpackDevServer host and port
 		'webpack/hot/only-dev-server' // "only" prevents reload on syntax errors
 	);
 
-	config.output.publicPath = 'http://localhost:3000/';
+	config.output.publicPath = 'http://localhost:9000/';
 	//config.module.loaders.push({ test: /\.jsx?$/, loaders: ['react-hot-loader', 'babel-loader?presets[]=react,presets[]=es2015'] });
 }
 

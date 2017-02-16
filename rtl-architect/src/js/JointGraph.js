@@ -4,6 +4,8 @@
 
 // MPL 2.0 License
 import Joint from "jointjs";
+import "jointjs/css/layout.css";
+import "jointjs/css/themes/default.css";
 
 // My Loads
 import IGraph from "./IGraph";

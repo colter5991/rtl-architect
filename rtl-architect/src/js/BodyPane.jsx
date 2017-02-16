@@ -21,7 +21,7 @@ class BodyPane extends React.Component {
 		// Constants
 		this.INACTIVE_COLOR = "black"; // The outline color of inactive graph elements
 		this.ACTIVE_COLOR = "blue";    // outline color of the active element
-		this.PAPERWIDTH = 800;
+		this.PAPERWIDTH = 400;
 		this.PAPERHEIGHT = 600;
 
 		this._handleCellChangeSource = this._handleCellChangeSource.bind(this);

@@ -16,3 +16,7 @@
 #verilog {
 	height: calc(100vh - 173px);
 }
+
+#paper:focus{
+  outline:none;
+}
