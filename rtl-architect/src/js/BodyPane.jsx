@@ -31,6 +31,9 @@ class BodyPane extends React.Component {
 		this._handleResizeWindow = this._handleResizeWindow.bind(this);
 		this._handleKeyPress = this._handleKeyPress.bind(this);
 		this._handleKeyDown = this._handleKeyDown.bind(this);
+		this._handleDragStart = this._handleDragStart.bind(this);
+		this._handleDrag = this._handleDrag.bind(this);
+		this._handleMouseUp = this._handleMouseUp.bind(this);
 		this._updateVerilog = this._updateVerilog.bind(this);
 
 		window.onresize = this._handleResizeWindow;
@@ -42,7 +45,10 @@ class BodyPane extends React.Component {
 			reset: "Active High",  // Whether the reset signal is active high or active low
 			initial_state: "",     // The name of the initial state
 			verilog_text: "",      // The Verilog code that is shown in the verilog panel
-			active_cell: null      // The currently active cell object
+			active_cell: null,      // The currently active cell object
+			drag_mouse_x: 0,
+			drag_mouse_y: 0,
+			dragging: false
 		};
 	}
 
@@ -117,9 +123,10 @@ class BodyPane extends React.Component {
 	}
 
 	// Handle clicking on nothing
-	_handleNothingClick() {
+	_handleNothingClick(event) {
 		$("#paper").focus();
 		this._clearActiveCell();
+		this._handleDragStart(event.originalEvent);
 	}
 
 	_initGraph() {
@@ -243,7 +250,6 @@ class BodyPane extends React.Component {
 	}
 
 	_handleKeyPress(event) {
-		console.log(event.originalEvent);
 		if ((event.keyCode || event.which) == 32)
 			event.preventDefault();
 		if (event.key.length == 1) {
@@ -252,15 +258,33 @@ class BodyPane extends React.Component {
 		}
 	}
 
+	_handleDragStart(event) {
+		this.setState({drag_mouse_x: event.clientX, drag_mouse_y: event.clientY, dragging: true});
+	}
+
+	_handleDrag(event) {
+		if (this.state.dragging) {
+			this.graph.MovePaper(event.clientX - this.state.drag_mouse_x, event.clientY - this.state.drag_mouse_y);
+			this.setState({drag_mouse_x: event.clientX, drag_mouse_y: event.clientY});
+		}
+	}
+
+	_handleMouseUp(event) {
+		this.setState({dragging: false});
+		this._updateVerilog();
+	}
+
 	render() {
 		return (
+			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
 			<SplitPane split="vertical" minSize={100}
 					defaultSize={document.documentElement.clientWidth / 2}
 					primary="second">
 				<div className="window" id="next-state">
 						<h2>Next State Logic</h2>
 						<pre>
-							<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress} onKeyDown={this._handleKeyDown} onMouseUp={this._updateVerilog}>
+							<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
+								onKeyDown={this._handleKeyDown}>
 								<ReactElementResize id="paper-resize" debounceTimeout={10} onResize={this._handleResizeWindow}></ReactElementResize>
 							</div>
 						</pre>
@@ -271,6 +295,7 @@ class BodyPane extends React.Component {
 					<div id="verilog"><pre>{this.state.verilog_text}</pre></div>
 				</div>
 			</SplitPane>
+			</div>
 		);
 	}
 };

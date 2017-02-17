@@ -131,6 +131,10 @@ class JointGraph extends IGraph {
 	HandleResizeWindow(width, height) {
 		this.paper.setDimensions(width, height);
 	}
+
+	MovePaper(x, y) {
+		this.paper.setOrigin(this.paper.options.origin.x + x, this.paper.options.origin.y + y);
+	}
 }
 
 export default JointGraph;
