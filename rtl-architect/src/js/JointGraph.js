@@ -15,7 +15,6 @@ class JointGraph extends IGraph {
 	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler) {
 		super();
 		this.graph = new Joint.dia.Graph();
-		// document.getElementById("next-state").offsetWidth
 		this.paper = new Joint.dia.Paper({
 			el: $('#paper'),
 			width: paper_width,
@@ -126,6 +125,10 @@ class JointGraph extends IGraph {
 	HandleCellClick(cell_view, active_color) {
 		this.SetCellStroke(cell_view.model, active_color);
 		return cell_view.model;
+	}
+
+	HandleResizeWindow(width, height) {
+		this.paper.setDimensions(width, height);
 	}
 }
 

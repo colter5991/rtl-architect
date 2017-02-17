@@ -5,6 +5,8 @@ import React from "react";
 import SplitPane from "react-split-pane";
 import "SplitPane.css";
 import Button from "react-bootstrap/lib/Button";
+// MIT License
+import {ReactElementResize} from "react-element-resize";
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
 
@@ -28,6 +30,9 @@ class BodyPane extends React.Component {
 		this._handleCellChangeTarget = this._handleCellChangeTarget.bind(this);
 		this._handleCellClick = this._handleCellClick.bind(this);
 		this._handleNothingClick = this._handleNothingClick.bind(this);
+		this._handleResizeWindow = this._handleResizeWindow.bind(this);
+
+		window.onresize = this._handleResizeWindow;
 
 		this.graph = null;
 		this.verilog_converter = null;
@@ -42,7 +47,7 @@ class BodyPane extends React.Component {
 
 	componentDidMount() {
 		// This must be performed after the object has mounted
-		this.graph = new JointGraph(this.PAPERWIDTH, this.PAPERHEIGHT, this._handleCellClick, this._handleNothingClick); // An IGraph object
+		this.graph = new JointGraph(document.getElementById("paper").offsetWidth, document.documentElement.clientHeight - 199, this._handleCellClick, this._handleNothingClick); // An IGraph object
 		// This object relies on the previous being loaded
 		this.verilog_converter = new VerilogConverter(this.graph);
 		this._initTable();
@@ -252,6 +257,12 @@ class BodyPane extends React.Component {
 		w2ui['grid'].refresh();
 	}
 
+	// Handle changes in the source of the transition
+	_handleResizeWindow() {
+		//debugger 
+		this.graph.HandleResizeWindow(Math.max(document.getElementById("paper").offsetWidth - 500, -500), Math.max(document.documentElement.clientHeight - 199, 0));
+	}
+
 	render() {
 		return (
 			<SplitPane split="vertical" minSize={100}
@@ -259,7 +270,11 @@ class BodyPane extends React.Component {
 					primary="second">
 				<div className="window" id="next-state">
 						<h2>Next State Logic</h2>
-						<div id="paper" className="paper"></div>
+						<pre>
+							<div id="paper" className="paper">
+								<ReactElementResize id="paper-resize" debounceTimeout={10} onResize={this._handleResizeWindow}></ReactElementResize>
+							</div>
+						</pre>
 						<div id="grid"></div>
 				</div>
 				<div className="window">

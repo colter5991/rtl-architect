@@ -8,7 +8,6 @@ window.MODULE_LOADED = true;
 // MIT License
 import Bootstrap from 'bootstrap/dist/css/bootstrap.css';
 import Jumbotron from 'react-bootstrap/lib/Jumbotron';
-
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
 

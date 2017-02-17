@@ -8,6 +8,10 @@
 	padding-bottom: 20px;
 	padding-left: 40px;
 	padding-right: 40px;
+	-webkit-tab-size: 4;
+	-moz-tab-size: 4;
+	-ms-tab-size: 4;
+	-o-tab-size: 4;
 	tab-size: 4;
 	margin-left: 10px;
 	margin-right: 10px;
@@ -19,4 +23,24 @@
 
 #paper:focus{
   outline:none;
+}
+
+#paper {
+	margin-right: -500px;
+    overflow: hidden;
+	position: relative;
+	background-color: rgba(0, 0, 0, 0);
+}
+
+#next-state {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#next-state pre {
+	overflow-x: hidden;
+}
+
+#paper-resize {
+	height: 100%;
 }
