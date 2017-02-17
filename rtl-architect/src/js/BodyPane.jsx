@@ -26,11 +26,12 @@ class BodyPane extends React.Component {
 		this.PAPERWIDTH = 400;
 		this.PAPERHEIGHT = 600;
 
-		this._handleCellChangeSource = this._handleCellChangeSource.bind(this);
-		this._handleCellChangeTarget = this._handleCellChangeTarget.bind(this);
 		this._handleCellClick = this._handleCellClick.bind(this);
 		this._handleNothingClick = this._handleNothingClick.bind(this);
 		this._handleResizeWindow = this._handleResizeWindow.bind(this);
+		this._handleKeyPress = this._handleKeyPress.bind(this);
+		this._handleKeyDown = this._handleKeyDown.bind(this);
+		this._updateVerilog = this._updateVerilog.bind(this);
 
 		window.onresize = this._handleResizeWindow;
 
@@ -47,7 +48,8 @@ class BodyPane extends React.Component {
 
 	componentDidMount() {
 		// This must be performed after the object has mounted
-		this.graph = new JointGraph(document.getElementById("paper").offsetWidth, document.documentElement.clientHeight - 199, this._handleCellClick, this._handleNothingClick); // An IGraph object
+		this.graph = new JointGraph(document.getElementById("paper").offsetWidth, document.documentElement.clientHeight - 199,
+			this._handleCellClick, this._handleNothingClick, this._updateVerilog); // An IGraph object
 		// This object relies on the previous being loaded
 		this.verilog_converter = new VerilogConverter(this.graph);
 		this._initTable();
@@ -60,7 +62,6 @@ class BodyPane extends React.Component {
 
 	_newState(xpos, ypos, name) {
 		const state = this.graph.NewState(xpos, ypos, name);
-		this._updateVerilog();
 
 		w2ui['grid'].columns.push({
 			field: state.id, caption: name, size: '120px', sortable: true, resizable: true,
@@ -78,6 +79,7 @@ class BodyPane extends React.Component {
 	}
 
 	_deleteState(state) {
+		let index;
 		for (index in w2ui['grid'].columns) {
 			if (w2ui['grid'].columns[index].field == state.id) {
 				w2ui['grid'].columns.splice(index, 1);
@@ -89,12 +91,10 @@ class BodyPane extends React.Component {
 		}
 
 		this.graph.DeleteState(state);
-		this._updateVerilog();
 	}
 
 	_editActiveCellString(character) {
 		this.graph.EditActiveCellString(character, this.state.active_cell);
-		this._updateVerilog();
 	}
 
 	// inactivate the current active cell
@@ -105,17 +105,7 @@ class BodyPane extends React.Component {
 	}
 
 	_newTransition(source, target, name) {
-		return this.graph.NewTransition(source, target, name, this._handleCellChangeSource, this._handleCellChangeTarget);
-	}
-
-	// Handle changes in the source of the transition
-	_handleCellChangeSource() {
-		this._updateVerilog();
-	}
-
-	// Handle changes in the  target of the transition
-	_handleCellChangeTarget() {
-		this._updateVerilog();
+		return this.graph.NewTransition(source, target, name, this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 	}
 
 	// Handle clicks (mainly select active element)
@@ -138,49 +128,12 @@ class BodyPane extends React.Component {
 		const s3 = this._newState(400, 100, "FOO_2");
 		const s4 = this._newState(400, 400, "BAR_2");
 
-		this._newTransition(s1, s2, "(x == y) || (z < w)");
-		this._newTransition(s4, s3, "z[2] == x");
-		this._newTransition(s3, s1, "(z[2] == y) && (x != y)");
-		this._newTransition(s2, s4, "w & z & !x");
-		this._newTransition(s4, s1, "z | w | (z ^ x)");
+		this._newTransition(s1, s2, "(x == y) || (z < w)", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+		this._newTransition(s4, s3, "z[2] == x", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+		this._newTransition(s3, s1, "(z[2] == y) && (x != y)", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+		this._newTransition(s2, s4, "w & z & !x", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+		this._newTransition(s4, s1, "z | w | (z ^ x)", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 		this._updateVerilog();
-
-
-		/*****************************************************************************
-		* Event handlers
-		*****************************************************************************/
-
-		$("#paper").on("keydown", function (event) {
-			switch (event.which) {
-				case 46: // Delete key
-					this._deleteState(this.state.active_cell); break;
-				case 83: // Letter s 
-					if (event.ctrlKey && event.shiftKey) {
-						this._newState(this.PAPERWIDTH / 2, this.PAPERHEIGHT / 2, "NEW_STATE");
-						event.preventDefault();
-					}
-					break;
-				case 65: // Letter a 
-					if (event.ctrlKey && event.shiftKey) {
-						this._newTransition({ x: this.PAPERWIDTH / 4, y: this.PAPERHEIGHT / 4 }, { x: this.PAPERWIDTH * 3 / 4, y: this.PAPERHEIGHT * 3 / 4 }, 'x==1 && y==0');
-						event.preventDefault();
-					}
-					break;
-				case 8:
-					this._editActiveCellString(null); break;
-			}
-		});
-
-		$("#paper").on("keypress", function(event) {
-			console.log(event.originalEvent);
-			if ((event.keyCode || event.which) == 32)
-				event.preventDefault();
-			str = String.fromCharCode(event.keyCode || event.which);
-			if (event.key.length == 1) {
-				this._editActiveCellString(event.key);
-				this._updateGrid();
-			}
-		});
 	}
 
 	_initTable() {
@@ -244,15 +197,17 @@ class BodyPane extends React.Component {
 	// This should be called whenever the grid tab is opened. It updates the state names.
 	// TO BE REMOVED
 	_updateGrid() {
-		stateList = this.graph.graph.getElements();
-		var stateDict = {};
-		for (index in stateList) {
-			state = stateList[index];
-			stateDict[state.id] = this.graph.GetCellText(state);
+		const state_list = this.graph.graph.getElements();
+		const state_dict = {};
+		let index;
+		for (index in state_list) {
+			const state = state_list[index];
+			state_dict[state.id] = this.graph.GetCellText(state);
 		}
-		for (columnIndex in w2ui['grid'].columns.slice(0, -2)) {
-			columnIndex = Number(columnIndex) + 2;
-			w2ui['grid'].columns[columnIndex].caption = stateDict[w2ui['grid'].columns[columnIndex].field];
+		let column_index;
+		for (column_index in w2ui['grid'].columns.slice(0, -2)) {
+			column_index = Number(column_index) + 2;
+			w2ui['grid'].columns[column_index].caption = state_dict[w2ui['grid'].columns[column_index].field];
 		}
 		w2ui['grid'].refresh();
 	}
@@ -260,7 +215,41 @@ class BodyPane extends React.Component {
 	// Handle changes in the source of the transition
 	_handleResizeWindow() {
 		//debugger 
-		this.graph.HandleResizeWindow(Math.max(document.getElementById("paper").offsetWidth - 500, -500), Math.max(document.documentElement.clientHeight - 199, 0));
+		this.graph.HandleResizeWindow(Math.max(document.getElementById("paper").offsetWidth - 500, -500),
+			Math.max(document.documentElement.clientHeight - 199, 0));
+	}
+
+	// Handle pressing a key
+	_handleKeyDown(event) {
+		switch (event.which) {
+			case 46: // Delete key
+				this._deleteState(this.state.active_cell); break;
+			case 83: // Letter s 
+				if (event.ctrlKey && event.shiftKey) {
+					this._newState(0, 0, "NEW_STATE");
+					event.preventDefault();
+				}
+				break;
+			case 65: // Letter a 
+				if (event.ctrlKey && event.shiftKey) {
+					this._newTransition({ x: 0, y: 0 }, { x: 100, y: 100 }, 'x==1 && y==0', this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+					event.preventDefault();
+				}
+				break;
+			case 8:
+				this._editActiveCellString(null); break;
+		}
+		this._updateVerilog();
+	}
+
+	_handleKeyPress(event) {
+		console.log(event.originalEvent);
+		if ((event.keyCode || event.which) == 32)
+			event.preventDefault();
+		if (event.key.length == 1) {
+			this._editActiveCellString(event.key);
+			this._updateGrid();
+		}
 	}
 
 	render() {
@@ -271,7 +260,7 @@ class BodyPane extends React.Component {
 				<div className="window" id="next-state">
 						<h2>Next State Logic</h2>
 						<pre>
-							<div id="paper" className="paper">
+							<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress} onKeyDown={this._handleKeyDown} onMouseUp={this._updateVerilog}>
 								<ReactElementResize id="paper-resize" debounceTimeout={10} onResize={this._handleResizeWindow}></ReactElementResize>
 							</div>
 						</pre>

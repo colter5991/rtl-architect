@@ -12,7 +12,7 @@ import IGraph from "./IGraph";
 
 class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
-	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler) {
+	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler, update_handler) {
 		super();
 		this.graph = new Joint.dia.Graph();
 		this.paper = new Joint.dia.Paper({
@@ -25,6 +25,9 @@ class JointGraph extends IGraph {
 
 		this.paper.on('cell:pointerdown', cell_click_handler);
 		this.paper.on('blank:pointerdown', nothing_click_handler);
+		this.graph.on('change', function() {
+			update_handler();
+		});
 	}
 
 	/*****************************************************************************
@@ -62,7 +65,7 @@ class JointGraph extends IGraph {
 		if (active_cell == null) {
 			return;
 		}
-		var text = this.GetCellText(active_cell);
+		let text = this.GetCellText(active_cell);
 		if (character)
 			text += character;
 		else if (text != "")
@@ -108,13 +111,11 @@ class JointGraph extends IGraph {
 
 	// Make a new link
 	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target) {
-
-		var cell = new Joint.shapes.fsa.Arrow({
+		const cell = new Joint.shapes.fsa.Arrow({
 			source: source,
 			target: target,
-			labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }],
+			labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
 		});
-
 		cell.on("change:source", handle_cell_change_source);
 		cell.on("change:target", handle_cell_change_target);
 
