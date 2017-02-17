@@ -34,6 +34,7 @@ class BodyPane extends React.Component {
 		this._handleDragStart = this._handleDragStart.bind(this);
 		this._handleDrag = this._handleDrag.bind(this);
 		this._handleMouseUp = this._handleMouseUp.bind(this);
+		this._handleScroll = this._handleScroll.bind(this);
 		this._updateVerilog = this._updateVerilog.bind(this);
 
 		window.onresize = this._handleResizeWindow;
@@ -274,6 +275,10 @@ class BodyPane extends React.Component {
 		this._updateVerilog();
 	}
 
+	_handleScroll(event) {
+		debugger 
+	}
+
 	render() {
 		return (
 			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
@@ -284,7 +289,7 @@ class BodyPane extends React.Component {
 						<h2>Next State Logic</h2>
 						<pre>
 							<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
-								onKeyDown={this._handleKeyDown}>
+								onKeyDown={this._handleKeyDown} onWheel={this._handleScroll}>
 								<ReactElementResize id="paper-resize" debounceTimeout={10} onResize={this._handleResizeWindow}></ReactElementResize>
 							</div>
 						</pre>
