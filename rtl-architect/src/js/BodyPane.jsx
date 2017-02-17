@@ -49,7 +49,8 @@ class BodyPane extends React.Component {
 			active_cell: null,      // The currently active cell object
 			drag_mouse_x: 0,
 			drag_mouse_y: 0,
-			dragging: false
+			dragging: false,
+			scale: 1
 		};
 	}
 
@@ -276,7 +277,9 @@ class BodyPane extends React.Component {
 	}
 
 	_handleScroll(event) {
-		debugger 
+		const new_scale = Math.max(0.1, this.state.scale + 0.001 * event.nativeEvent.wheelDelta);
+		this.graph.ScalePaper(new_scale, event.clientX, event.clientY);
+		this.setState({scale: new_scale});
 	}
 
 	render() {

@@ -135,6 +135,10 @@ class JointGraph extends IGraph {
 	MovePaper(x, y) {
 		this.paper.setOrigin(this.paper.options.origin.x + x, this.paper.options.origin.y + y);
 	}
+
+	ScalePaper(scale, mousex, mousey) {
+		this.paper.scale(scale, scale);
+	}
 }
 
 export default JointGraph;
