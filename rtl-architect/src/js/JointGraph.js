@@ -1,6 +1,7 @@
 ﻿// MIT License
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
+import "./CustomShape";
 
 // MPL 2.0 License
 import Joint from "jointjs";
@@ -78,7 +79,7 @@ class JointGraph extends IGraph {
 		var state = new Joint.shapes.fsa.State({
 			position: { x: xpos, y: ypos },
 			size: { width: 120, height: 40 },
-			attrs: { text: { text: name } }
+			attrs: { text: { text: name } },
 		});
 
 		this.graph.addCell(state);

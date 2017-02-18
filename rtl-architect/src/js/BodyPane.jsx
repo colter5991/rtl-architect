@@ -277,7 +277,7 @@ class BodyPane extends React.Component {
 	}
 
 	_handleScroll(event) {
-		const new_scale = Math.max(0.1, this.state.scale + 0.001 * event.nativeEvent.wheelDelta);
+		const new_scale = Math.max(0.5, this.state.scale + 0.001 * event.nativeEvent.wheelDelta);
 		this.graph.ScalePaper(new_scale, event.clientX, event.clientY);
 		this.setState({scale: new_scale});
 	}
@@ -289,7 +289,9 @@ class BodyPane extends React.Component {
 					defaultSize={document.documentElement.clientWidth / 2}
 					primary="second">
 				<div className="window" id="next-state">
-						<h2>Next State Logic</h2>
+					<div className="next-state-menu">
+						<h2>Next State Logic <span><input type="text" id="title-edit" /></span></h2>
+					</div>
 						<pre>
 							<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
 								onKeyDown={this._handleKeyDown} onWheel={this._handleScroll}>

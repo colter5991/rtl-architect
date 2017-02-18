@@ -44,3 +44,13 @@
 #paper-resize {
 	height: 100%;
 }
+
+.html-element textarea {
+   pointer-events: all;
+}
+
+#title-edit {
+	font-size: 0.5em;
+	vertical-align: middle;
+	margin-left: 20px;
+}
