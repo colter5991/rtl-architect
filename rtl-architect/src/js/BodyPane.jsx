@@ -36,7 +36,9 @@ class BodyPane extends React.Component {
 		this._handleMouseUp = this._handleMouseUp.bind(this);
 		this._handleScroll = this._handleScroll.bind(this);
 		this._updateVerilog = this._updateVerilog.bind(this);
-
+		this._handleEditTitleInput = this._handleEditTitleInput.bind(this);
+		this._handleDoubleClick = this._handleDoubleClick.bind(this);
+		
 		window.onresize = this._handleResizeWindow;
 
 		this.graph = null;
@@ -57,7 +59,7 @@ class BodyPane extends React.Component {
 	componentDidMount() {
 		// This must be performed after the object has mounted
 		this.graph = new JointGraph(document.getElementById("paper").offsetWidth, document.documentElement.clientHeight - 199,
-			this._handleCellClick, this._handleNothingClick, this._updateVerilog); // An IGraph object
+			this._handleCellClick, this._handleNothingClick, this._handleDoubleClick, this._updateVerilog); // An IGraph object
 		// This object relies on the previous being loaded
 		this.verilog_converter = new VerilogConverter(this.graph);
 		this._initTable();
@@ -122,6 +124,7 @@ class BodyPane extends React.Component {
 		this._clearActiveCell();
 		const cell = this.graph.HandleCellClick(cell_view, this.ACTIVE_COLOR);
 		this.setState({active_cell: cell});
+		document.getElementById("title-edit").value = this.graph.GetCellText(this.state.active_cell);
 	}
 
 	// Handle clicking on nothing
@@ -129,6 +132,7 @@ class BodyPane extends React.Component {
 		$("#paper").focus();
 		this._clearActiveCell();
 		this._handleDragStart(event.originalEvent);
+		document.getElementById("title-edit").value = "";
 	}
 
 	_initGraph() {
@@ -256,6 +260,7 @@ class BodyPane extends React.Component {
 			event.preventDefault();
 		if (event.key.length == 1) {
 			this._editActiveCellString(event.key);
+			document.getElementById("title-edit").value = this.graph.GetCellText(this.state.active_cell);
 			this._updateGrid();
 		}
 	}
@@ -282,6 +287,14 @@ class BodyPane extends React.Component {
 		this.setState({scale: new_scale});
 	}
 
+	_handleEditTitleInput(event) {
+		this.graph.ReplaceActiveCellString(document.getElementById("title-edit").value, this.state.active_cell);
+	}
+
+	_handleDoubleClick(event) {
+		document.getElementById("title-edit").focus();
+	}
+
 	render() {
 		return (
 			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
@@ -290,7 +303,7 @@ class BodyPane extends React.Component {
 					primary="second">
 				<div className="window" id="next-state">
 					<div className="next-state-menu">
-						<h2>Next State Logic <span><input type="text" id="title-edit" /></span></h2>
+						<h2>Next State Logic <span><input type="text" id="title-edit" disabled={this.state.active_cell === null} onChange={this._handleEditTitleInput} /></span></h2>
 					</div>
 						<pre>
 							<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}

@@ -13,7 +13,7 @@ import IGraph from "./IGraph";
 
 class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
-	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler, update_handler) {
+	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler, double_click_handler, update_handler) {
 		super();
 		this.graph = new Joint.dia.Graph();
 		this.paper = new Joint.dia.Paper({
@@ -24,6 +24,7 @@ class JointGraph extends IGraph {
 			model: this.graph
 		});
 
+		this.paper.on('cell:pointerdblclick', double_click_handler);
 		this.paper.on('cell:pointerdown', cell_click_handler);
 		this.paper.on('blank:pointerdown', nothing_click_handler);
 		this.graph.on('change', function() {
@@ -72,6 +73,14 @@ class JointGraph extends IGraph {
 		else if (text != "")
 			text = text.substring(0, text.length - 1);
 		this._setCellText(active_cell, text);
+	}
+
+	// Replaces the active cell string with the string
+	ReplaceActiveCellString(string, active_cell) {
+		if (active_cell === null) {
+			return;
+		}
+		this._setCellText(active_cell, string);
 	}
 
 	// Create a new State View
