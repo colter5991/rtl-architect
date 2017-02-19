@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom';
 import SplitPane from "react-split-pane";
 import "SplitPane.css";
 import Button from "react-bootstrap/lib/Button";
+import ButtonToolbar from "react-bootstrap/lib/ButtonToolbar";
 import Overlay from "react-bootstrap/lib/Overlay";
 import Glyphicon from "react-bootstrap/lib/Glyphicon";
 import SettingsMenu from "./SettingsMenu"
@@ -46,6 +47,7 @@ class BodyPane extends React.Component {
 		this._handleClockEdge = this._handleClockEdge.bind(this);
 		this._handleReset = this._handleReset.bind(this);
 		this._handleInitialState = this._handleInitialState.bind(this);
+		this._handleFileNameChange = this._handleFileNameChange.bind(this);
 		this._getStateNames = this._getStateNames.bind(this);
 		
 		window.onresize = this._handleResizeWindow;
@@ -62,7 +64,8 @@ class BodyPane extends React.Component {
 			drag_mouse_y: 0,
 			dragging: false,
 			scale: 1,
-			show_settings: false
+			show_settings: false,
+			file_name: ""
 		};
 	}
 
@@ -317,6 +320,7 @@ class BodyPane extends React.Component {
 
 	_handleToggleMenu(event) {
 		this.setState({ show_settings: !this.state.show_settings });
+
 	}
 
 	_handleClockEdge(event) {
@@ -332,6 +336,10 @@ class BodyPane extends React.Component {
 	_handleInitialState(event) {
 		this.setState({ initial_state: event.target.value });
 		this._updateVerilog();
+	}
+
+	_handleFileNameChange(event) {
+		this.setState({ file_name: event.target.value });
 	}
 
 	_getStateNames() {
@@ -360,7 +368,8 @@ class BodyPane extends React.Component {
 				</div>
 				<div className="window">
 					<h2>Verilog Code 
-					<span id="dropdown-span"><Button ref="target" onClick={this._handleToggleMenu} id="dropdown-settings">
+					<span id="dropdown-span"><ButtonToolbar>
+					<Button ref="target" onClick={this._handleToggleMenu} id="dropdown-settings">
 						<Glyphicon glyph="cog" style={this.state.initial_state === "" ? {color: "red"} : {}} />
 						<Overlay
 							animation={false}
@@ -374,10 +383,15 @@ class BodyPane extends React.Component {
 							<SettingsMenu handleEdge={this._handleClockEdge} clockEdge={this.state.edge}
 								reset={this.state.reset} initialState={this.state.initial_state}
 								handleReset={this._handleReset} handleInitialState={this._handleInitialState}
-								stateNames={this._getStateNames()} 
+								stateNames={this._getStateNames()} handleFileNameChange={this._handleFileNameChange} 
+								fileNameValue={this.state.file_name}
 						/>
 						</Overlay>
-					</Button></span>
+					</Button>
+					<Button href={`data:text/plain;charset=utf-8,${encodeURIComponent(this.state.verilog_text)}`} download={this.state.file_name === "" ? "StateMachine.sv" : this.state.file_name}>
+						<Glyphicon glyph="download-alt" />
+					</Button>
+					</ButtonToolbar></span>
 					</h2>
 					<div id="verilog"><pre>{this.state.verilog_text}</pre></div>
 				</div>

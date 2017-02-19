@@ -20,6 +20,9 @@ class SettingsMenu extends React.Component {
 				padding: 10,
 				}}
 			>
+				<label>File Name:</label>
+				<input type="text" placeholder="StateMachine.sv" value={this.props.fileNameValue} onChange={this.props.handleFileNameChange} />
+				<br />
 				<label>Clock Edge:</label>
 				<select value={this.props.clockEdge} id="clock-edge" onChange={this.props.handleEdge}>
 					<option value="Positive">Positive</option>
