@@ -1,0 +1,11 @@
+﻿.settings-popdown-menu label {
+	padding-right: 10px;
+}
+
+.settings-popdown-menu select {
+	float: right;
+}
+
+#initial-state option {
+	color: black;
+}

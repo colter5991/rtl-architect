@@ -54,3 +54,8 @@
 	vertical-align: middle;
 	margin-left: 20px;
 }
+
+#dropdown-span {
+	float: right;
+	margin-right: 10px;
+}

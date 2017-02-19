@@ -1,10 +1,14 @@
 // BSD License
 import React from "react";
+import ReactDOM from 'react-dom';
 
 // MIT License
 import SplitPane from "react-split-pane";
 import "SplitPane.css";
 import Button from "react-bootstrap/lib/Button";
+import Overlay from "react-bootstrap/lib/Overlay";
+import Glyphicon from "react-bootstrap/lib/Glyphicon";
+import SettingsMenu from "./SettingsMenu"
 // MIT License
 import {ReactElementResize} from "react-element-resize";
 //import jQuery from "jquery";
@@ -38,6 +42,11 @@ class BodyPane extends React.Component {
 		this._updateVerilog = this._updateVerilog.bind(this);
 		this._handleEditTitleInput = this._handleEditTitleInput.bind(this);
 		this._handleDoubleClick = this._handleDoubleClick.bind(this);
+		this._handleToggleMenu = this._handleToggleMenu.bind(this);
+		this._handleClockEdge = this._handleClockEdge.bind(this);
+		this._handleReset = this._handleReset.bind(this);
+		this._handleInitialState = this._handleInitialState.bind(this);
+		this._getStateNames = this._getStateNames.bind(this);
 		
 		window.onresize = this._handleResizeWindow;
 
@@ -46,13 +55,14 @@ class BodyPane extends React.Component {
 		this.state = {
 			edge: "Positive",      // Whether the clock edge is positive, negative, or both
 			reset: "Active High",  // Whether the reset signal is active high or active low
-			initial_state: "",     // The name of the initial state
+			initial_state: "FOO",     // The name of the initial state
 			verilog_text: "",      // The Verilog code that is shown in the verilog panel
 			active_cell: null,      // The currently active cell object
 			drag_mouse_x: 0,
 			drag_mouse_y: 0,
 			dragging: false,
-			scale: 1
+			scale: 1,
+			show_settings: false
 		};
 	}
 
@@ -89,6 +99,15 @@ class BodyPane extends React.Component {
 	}
 
 	_deleteState(state) {
+		if (this.graph.GetCellText(state) === this.state.initial_state) {
+			this.setState({ initial_state: "" });
+		}
+
+		if (this.state.active_cell === state) {
+			this.setState({ active_cell: null });
+			document.getElementById("title-edit").value = "";
+		}
+
 		let index;
 		for (index in w2ui['grid'].columns) {
 			if (w2ui['grid'].columns[index].field == state.id) {
@@ -236,7 +255,8 @@ class BodyPane extends React.Component {
 	_handleKeyDown(event) {
 		switch (event.which) {
 			case 46: // Delete key
-				this._deleteState(this.state.active_cell); break;
+				this._deleteState(this.state.active_cell);
+				break;
 			case 83: // Letter s 
 				if (event.ctrlKey && event.shiftKey) {
 					this._newState(0, 0, "NEW_STATE");
@@ -295,6 +315,31 @@ class BodyPane extends React.Component {
 		document.getElementById("title-edit").focus();
 	}
 
+	_handleToggleMenu(event) {
+		this.setState({ show_settings: !this.state.show_settings });
+	}
+
+	_handleClockEdge(event) {
+		this.setState({ edge: event.target.value });
+		this._updateVerilog();
+	}
+
+	_handleReset(event) {
+		this.setState({ reset: event.target.value });
+		this._updateVerilog();
+	}
+
+	_handleInitialState(event) {
+		this.setState({ initial_state: event.target.value });
+		this._updateVerilog();
+	}
+
+	_getStateNames() {
+		if (this.graph === null)
+			return [];
+		return this.graph.GetStateNames();
+	}
+
 	render() {
 		return (
 			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
@@ -314,7 +359,26 @@ class BodyPane extends React.Component {
 						<div id="grid"></div>
 				</div>
 				<div className="window">
-					<h2>Verilog Code</h2>
+					<h2>Verilog Code 
+					<span id="dropdown-span"><Button ref="target" onClick={this._handleToggleMenu} id="dropdown-settings">
+						<Glyphicon glyph="cog" style={this.state.initial_state === "" ? {color: "red"} : {}} />
+						<Overlay
+							animation={false}
+							rootClose
+							show={this.state.show_settings}
+							onHide={() => this.setState({ show_settings: false })}
+							placement="bottom"
+							container={this}
+							target={() => ReactDOM.findDOMNode(this.refs.target)}
+						>
+							<SettingsMenu handleEdge={this._handleClockEdge} clockEdge={this.state.edge}
+								reset={this.state.reset} initialState={this.state.initial_state}
+								handleReset={this._handleReset} handleInitialState={this._handleInitialState}
+								stateNames={this._getStateNames()} 
+						/>
+						</Overlay>
+					</Button></span>
+					</h2>
 					<div id="verilog"><pre>{this.state.verilog_text}</pre></div>
 				</div>
 			</SplitPane>

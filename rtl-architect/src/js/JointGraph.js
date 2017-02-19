@@ -149,6 +149,16 @@ class JointGraph extends IGraph {
 	ScalePaper(scale, mousex, mousey) {
 		this.paper.scale(scale, scale);
 	}
+
+	GetStateNames() {
+		const state_names = [];
+		const elements = this.graph.getElements();
+		for (let state = 0; state < elements.length; state++) {
+			state_names.push({id: state, name: this.GetCellText(elements[state]) });
+		}
+
+		return state_names;
+	}
 }
 
 export default JointGraph;
