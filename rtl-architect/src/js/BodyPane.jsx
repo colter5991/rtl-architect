@@ -28,6 +28,7 @@ class BodyPane extends React.Component {
 		// Constants
 		this.INACTIVE_COLOR = "black"; // The outline color of inactive graph elements
 		this.ACTIVE_COLOR = "blue";    // outline color of the active element
+		this.INACTIVE_OUTPUT_COLOR = "green";
 		this.PAPERWIDTH = 400;
 		this.PAPERHEIGHT = 600;
 
@@ -132,7 +133,7 @@ class BodyPane extends React.Component {
 	// inactivate the current active cell
 	_clearActiveCell() {
 		if (this.state.active_cell)
-			this.graph.SetCellStroke(this.state.active_cell, this.INACTIVE_COLOR);
+			this.graph.SetCellStroke(this.state.active_cell, this.INACTIVE_COLOR, this.INACTIVE_OUTPUT_COLOR);
 		this.setState({ active_cell: null });
 	}
 
@@ -351,7 +352,7 @@ class BodyPane extends React.Component {
 	render() {
 		return (
 			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
-			<SplitPane split="vertical" minSize={100}
+			<SplitPane split="vertical" minSize={300}
 					defaultSize={document.documentElement.clientWidth / 2}
 					primary="second">
 				<div className="window" id="next-state">

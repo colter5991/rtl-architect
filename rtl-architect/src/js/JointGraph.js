@@ -1,7 +1,6 @@
 ﻿// MIT License
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
-import "./CustomShape";
 
 // MPL 2.0 License
 import Joint from "jointjs";
@@ -10,6 +9,8 @@ import "jointjs/css/themes/default.css";
 
 // My Loads
 import IGraph from "./IGraph";
+import "./OutputTransition";
+import "./Output";
 
 class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
@@ -84,12 +85,20 @@ class JointGraph extends IGraph {
 	}
 
 	// Create a new State View
-	NewState(xpos, ypos, name) {
-		var state = new Joint.shapes.fsa.State({
-			position: { x: xpos, y: ypos },
-			size: { width: 120, height: 40 },
-			attrs: { text: { text: name } },
-		});
+	NewState(xpos, ypos, name, output=false) {
+		if (output) {
+			var state = new Joint.shapes.output.Element({
+				position: { x: xpos, y: ypos },
+				size: { width: 100, height: 40 },
+				attrs: { text: { text: name } }
+			});
+		} else {
+			var state = new Joint.shapes.fsa.State({
+				position: { x: xpos, y: ypos },
+				size: { width: 120, height: 40 },
+				attrs: { text: { text: name } }
+			});
+		}
 
 		this.graph.addCell(state);
 
@@ -102,11 +111,12 @@ class JointGraph extends IGraph {
 	}
 
 	// Set the stroke of the given cell to the given color
-	SetCellStroke(state, stroke) {
+	SetCellStroke(state, stroke, output_color) {
 		if (state.attributes.type == "fsa.State") {
 			state.attr("circle/stroke", stroke);
-		}
-		else {
+		} else if (state.attributes.type === "fsa.OutputTransition") {
+			state.attr({ '.connection': { stroke: output_color } });
+		} else {
 			state.attr({ '.connection': { stroke: stroke } });
 		}
 	}
@@ -120,12 +130,22 @@ class JointGraph extends IGraph {
 	}
 
 	// Make a new link
-	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target) {
-		const cell = new Joint.shapes.fsa.Arrow({
-			source: source,
-			target: target,
-			labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
-		});
+	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target, output=false) {
+		let  cell;
+		if (output) {
+			cell = new Joint.shapes.outputTransition.Element({
+				source: source,
+				target: target,
+				labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
+			});
+			cell.attr({ '.connection': { stroke: "green" } });
+		} else {
+			cell = new Joint.shapes.fsa.Arrow({
+				source: source,
+				target: target,
+				labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
+			});
+		}
 		cell.on("change:source", handle_cell_change_source);
 		cell.on("change:target", handle_cell_change_target);
 

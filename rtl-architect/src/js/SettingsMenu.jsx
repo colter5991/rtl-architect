@@ -17,7 +17,7 @@ class SettingsMenu extends React.Component {
 				borderRadius: 3,
 				marginLeft: -5,
 				marginTop: 5,
-				padding: 10,
+				padding: 10
 				}}
 			>
 				<label>File Name:</label>
