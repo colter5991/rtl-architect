@@ -141,6 +141,11 @@ class BodyPane extends React.Component {
 		return this.graph.NewTransition(source, target, name, this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 	}
 
+	_newOutput(source, target, condition, output) {
+		this.graph.NewTransition(source, target, condition, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, true);
+		this.graph.NewState(target.x, target.y, output, true);
+	}
+
 	// Handle clicks (mainly select active element)
 	_handleCellClick(cell_view) {
 		$("#paper").focus();
@@ -273,7 +278,12 @@ class BodyPane extends React.Component {
 					event.preventDefault();
 				}
 				break;
-			case 8:
+			case 79: // Letter o
+				if (event.ctrlKey && event.shiftKey) {
+					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "x==1 && y==0", "E = 1;");
+					event.preventDefault();
+				}
+				break;			case 8:
 				this._editActiveCellString(null); break;
 		}
 		this._updateVerilog();

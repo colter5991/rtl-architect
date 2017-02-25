@@ -40,7 +40,7 @@ class JointGraph extends IGraph {
 	GetCellText(state) {
 		if (!state)
 			return null;
-		if (state.attributes.type == "fsa.State")
+		if (state.attributes.type === "fsa.State" || state.attributes.type === "fsa.Output")
 			return state.attr("text/text");
 		else
 			return state.label(0).attrs.text.text;
@@ -112,8 +112,10 @@ class JointGraph extends IGraph {
 
 	// Set the stroke of the given cell to the given color
 	SetCellStroke(state, stroke, output_color) {
-		if (state.attributes.type == "fsa.State") {
+		if (state.attributes.type === "fsa.State") {
 			state.attr("circle/stroke", stroke);
+		} else if (state.attributes.type === "fsa.Output") {
+			state.attr("rect/stroke", stroke);
 		} else if (state.attributes.type === "fsa.OutputTransition") {
 			state.attr({ '.connection': { stroke: output_color } });
 		} else {
@@ -123,7 +125,7 @@ class JointGraph extends IGraph {
 
 	// Set the text of the given cell to the given text
 	_setCellText(state, text) {
-		if (state.attributes.type == "fsa.State")
+		if (state.attributes.type === "fsa.State" || state.attributes.type === "fsa.Output")
 			state.attr("text/text", text);
 		else
 			state.label(0, { attrs: { text: { text: text } } });
@@ -154,7 +156,7 @@ class JointGraph extends IGraph {
 	}
 
 	HandleCellClick(cell_view, active_color) {
-		this.SetCellStroke(cell_view.model, active_color);
+		this.SetCellStroke(cell_view.model, active_color, active_color);
 		return cell_view.model;
 	}
 
