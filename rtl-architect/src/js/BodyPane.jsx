@@ -50,6 +50,8 @@ class BodyPane extends React.Component {
 		this._handleInitialState = this._handleInitialState.bind(this);
 		this._handleFileNameChange = this._handleFileNameChange.bind(this);
 		this._getStateNames = this._getStateNames.bind(this);
+		this._handleTransitionChangeSource = this._handleTransitionChangeSource.bind(this);
+		this._handleTransitionChangeTarget = this._handleTransitionChangeTarget.bind(this);
 		
 		window.onresize = this._handleResizeWindow;
 
@@ -317,7 +319,7 @@ class BodyPane extends React.Component {
 
 	_handleScroll(event) {
 		const new_scale = Math.max(0.5, this.state.scale + 0.001 * event.nativeEvent.wheelDelta);
-		this.graph.ScalePaper(new_scale, event.clientX, event.clientY);
+		this.graph.ScalePaper(new_scale);
 		this.setState({scale: new_scale});
 	}
 
@@ -352,6 +354,10 @@ class BodyPane extends React.Component {
 	_handleFileNameChange(event) {
 		this.setState({ file_name: event.target.value });
 	}
+
+	_handleTransitionChangeSource() { }
+
+	_handleTransitionChangeTarget() { }
 
 	_getStateNames() {
 		if (this.graph === null)

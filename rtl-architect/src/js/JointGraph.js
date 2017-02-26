@@ -22,7 +22,34 @@ class JointGraph extends IGraph {
 			width: paper_width,
 			height: paper_height,
 			gridSize: 1,
-			model: this.graph
+			model: this.graph,
+			validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
+				if (linkView.model.attributes.type === "fsa.OutputTransition") {
+					// Link is an output
+					if (cellViewS && (cellViewS.model.attributes.type === "fsa.Output"
+						|| cellViewS.model.attributes.type === "fsa.Arrow"
+						|| cellViewS.model.attributes.type === "fsa.OutputTransition")) {
+						return false;
+					} else if (cellViewT && (cellViewT.model.attributes.type === "fsa.State"
+						|| cellViewT.model.attributes.type === "fsa.Arrow"
+						|| cellViewT.model.attributes.type === "fsa.OutputTransition")) {
+						return false;
+					}
+				} else {
+					// Link is a state transition
+					if (cellViewS && (cellViewS.model.attributes.type === "fsa.Output"
+						|| cellViewS.model.attributes.type === "fsa.Arrow"
+						|| cellViewS.model.attributes.type === "fsa.OutputTransition")) {
+						return false;
+					} else if (cellViewT && (cellViewT.model.attributes.type === "fsa.Output"
+						|| cellViewT.model.attributes.type === "fsa.Arrow"
+						|| cellViewT.model.attributes.type === "fsa.OutputTransition")) {
+						return false;
+					}
+				}
+
+				return true;
+			}
 		});
 
 		this.paper.on('cell:pointerdblclick', double_click_handler);
@@ -46,8 +73,22 @@ class JointGraph extends IGraph {
 			return state.label(0).attrs.text.text;
 	}
 
-	GetConnectedLinks(element, opt) {
-		return this.graph.getConnectedLinks(element, opt);
+	GetTransitionLinks(element, opt) {
+		const t_list = this.graph.getConnectedLinks(element, opt);
+
+		// Trim out links that aren't transitions
+		t_list.filter(function (x) { return x.attributes.type !== "fsa.Arrow" });
+
+		return t_list;
+	}
+
+	GetOutputLinks(element, opt) {
+		const t_list = this.graph.getConnectedLinks(element, opt);
+
+		// Trim out links that aren't transitions
+		t_list.filter(function (x) { return x.attributes.type !== "fsa.OutputTransition" });
+
+		return t_list;
 	}
 
 	GetElements() {
@@ -168,7 +209,7 @@ class JointGraph extends IGraph {
 		this.paper.setOrigin(this.paper.options.origin.x + x, this.paper.options.origin.y + y);
 	}
 
-	ScalePaper(scale, mousex, mousey) {
+	ScalePaper(scale) {
 		this.paper.scale(scale, scale);
 	}
 

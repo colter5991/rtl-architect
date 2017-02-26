@@ -6,12 +6,23 @@ class IGraph {
 		return this;
 	}
 
+	// Returns a list of links designated as state transitions.
 	// Following the format of:
 	// http://resources.jointjs.com/docs/jointjs/v1.0/joint.html#dia.Graph.prototype.getConnectedLinks
-	// Returned element must have function getTargetElement() following the format:
+	// Returned links must have function getTargetElement() following the format:
 	// http://resources.jointjs.com/docs/jointjs/v1.0/joint.html#dia.Link.prototype.getTargetElement
 	// This new function should return a state
-	GetConnectedLinks(element, opt) {
+	GetTransitionLinks(element, opt) {
+		return this;
+	}
+
+	// Returns a list of links designated as outputs.
+	// Following the format of:
+	// http://resources.jointjs.com/docs/jointjs/v1.0/joint.html#dia.Graph.prototype.getConnectedLinks
+	// Returned links must have function getTargetElement() following the format:
+	// http://resources.jointjs.com/docs/jointjs/v1.0/joint.html#dia.Link.prototype.getTargetElement
+	// This new function should return a state
+	GetOutputLinks(element, opt) {
 		return this;
 	}
 

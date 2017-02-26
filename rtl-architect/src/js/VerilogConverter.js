@@ -7,7 +7,7 @@
 	// block with the big ol' if/else if structure to choose the nextState.
 	_getStateTransitionText(state) {
 		let text = "\t\t" + this.graph.GetCellText(state) + ' : begin\n';
-		let t_list = this.graph.GetConnectedLinks(state, { "outbound": true });
+		let t_list = this.graph.GetTransitionLinks(state, { "outbound": true });
 
 		// Trim out transitions with no target
 		t_list = t_list.filter(function (x) { return x.getTargetElement() != null; });
