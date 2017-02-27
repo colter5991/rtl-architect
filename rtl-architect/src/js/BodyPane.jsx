@@ -78,7 +78,6 @@ class BodyPane extends React.Component {
 			this._handleCellClick, this._handleNothingClick, this._handleDoubleClick, this._updateVerilog); // An IGraph object
 		// This object relies on the previous being loaded
 		this.verilog_converter = new VerilogConverter(this.graph);
-		this._initTable();
 		this._initGraph();
 	}
 
@@ -87,20 +86,7 @@ class BodyPane extends React.Component {
 	}
 
 	_newState(xpos, ypos, name) {
-		const state = this.graph.NewState(xpos, ypos, name);
-
-		w2ui['grid'].columns.push({
-			field: state.id, caption: name, size: '120px', sortable: true, resizable: true,
-			editable: { type: 'text' }
-		});
-
-		const record_list = w2ui['grid'].records;
-		let index;
-		for (index in record_list) {
-			const record = record_list[index];
-			record[state.id] = "";
-		}
-
+		const state = this.graph.NewState(xpos, ypos, name, this.INACTIVE_OUTPUT_COLOR);
 		return state;
 	}
 
@@ -112,17 +98,6 @@ class BodyPane extends React.Component {
 		if (this.state.active_cell === state) {
 			this.setState({ active_cell: null });
 			document.getElementById("title-edit").value = "";
-		}
-
-		let index;
-		for (index in w2ui['grid'].columns) {
-			if (w2ui['grid'].columns[index].field == state.id) {
-				w2ui['grid'].columns.splice(index, 1);
-				break;
-			}
-		}
-		for (index in w2ui['grid'].records) {
-			delete w2ui['grid'].records[index][state.id];
 		}
 
 		this.graph.DeleteState(state);
@@ -140,12 +115,12 @@ class BodyPane extends React.Component {
 	}
 
 	_newTransition(source, target, name) {
-		return this.graph.NewTransition(source, target, name, this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+		return this.graph.NewTransition(source, target, name, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, this.INACTIVE_OUTPUT_COLOR);
 	}
 
 	_newOutput(source, target, condition, output) {
-		this.graph.NewTransition(source, target, condition, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, true);
-		this.graph.NewState(target.x, target.y, output, true);
+		this.graph.NewTransition(source, target, condition, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, this.INACTIVE_OUTPUT_COLOR, true);
+		this.graph.NewState(target.x, target.y, output, this.INACTIVE_OUTPUT_COLOR, true);
 	}
 
 	// Handle clicks (mainly select active element)
@@ -179,82 +154,6 @@ class BodyPane extends React.Component {
 		this._updateVerilog();
 	}
 
-	_initTable() {
-		const update = this._updateVerilog;
-		$('#grid').w2grid({
-			name: 'grid',
-			show: {
-				toolbar: true,
-				footer: false,
-				toolbarSave: false,
-			},
-			columns: [
-				{
-					field: 'variable', caption: 'Variable Name', size: '120px', sortable: true, resizable: true,
-					editable: { type: 'text' }
-				},
-				{
-					field: 'default', caption: 'Default Value', size: '120px', sortable: true, resizable: true,
-					editable: { type: 'text' }
-				},
-			],
-			toolbar: {
-				items: [
-					{ id: 'add', type: 'button', caption: 'Add Record', icon: 'w2ui-icon-plus' }
-				],
-				onClick: function (event) {
-					if (event.target == 'add') {
-						w2ui.grid.add({ recid: w2ui.grid.records.length + 1, variable: "VAR" + (w2ui.grid.records.length + 1), 'default': 0 });
-					}
-				}
-			},
-			records: [
-				{ recid: 1, variable: 'Y', default: 0 },
-			],
-
-			onChange: function (event) {
-				event.onComplete = function (event) {
-					this.save();
-					update();
-				}
-			}
-		});
-
-		// Re-implement save and merge function because the built in implementation
-		// doesn't like field names with dashes in them
-		w2ui['grid'].save = function () {
-			changes = this.getChanges();
-			for (cIndex in this.getChanges()) {
-				change = changes[cIndex];
-				record = this.get(change.recid);
-				for (item in change) {
-					if (item != 'recid')
-						record[item] = change[item];
-				}
-				delete record.changes;
-			}
-		}
-		w2ui['grid'].refresh();
-	}
-
-	// This should be called whenever the grid tab is opened. It updates the state names.
-	// TO BE REMOVED
-	_updateGrid() {
-		const state_list = this.graph.graph.getElements();
-		const state_dict = {};
-		let index;
-		for (index in state_list) {
-			const state = state_list[index];
-			state_dict[state.id] = this.graph.GetCellText(state);
-		}
-		let column_index;
-		for (column_index in w2ui['grid'].columns.slice(0, -2)) {
-			column_index = Number(column_index) + 2;
-			w2ui['grid'].columns[column_index].caption = state_dict[w2ui['grid'].columns[column_index].field];
-		}
-		w2ui['grid'].refresh();
-	}
-
 	// Handle changes in the source of the transition
 	_handleResizeWindow() {
 		//debugger 
@@ -282,7 +181,7 @@ class BodyPane extends React.Component {
 				break;
 			case 79: // Letter o
 				if (event.ctrlKey && event.shiftKey) {
-					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "x==1 && y==0", "E = 1;");
+					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "x==1 && y==0", "E = 1");
 					event.preventDefault();
 				}
 				break;			case 8:
@@ -297,7 +196,6 @@ class BodyPane extends React.Component {
 		if (event.key.length == 1) {
 			this._editActiveCellString(event.key);
 			document.getElementById("title-edit").value = this.graph.GetCellText(this.state.active_cell);
-			this._updateGrid();
 		}
 	}
 

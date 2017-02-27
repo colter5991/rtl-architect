@@ -29,7 +29,7 @@ class IGraph {
 	// Following the format of:
 	// http://resources.jointjs.com/docs/jointjs/v1.0/joint.html#dia.Graph.prototype.getElements
 	// Should return a list of states
-	GetElements() {
+	GetStates() {
 		return this;
 	}
 

@@ -30,7 +30,7 @@
 	// Function to get how many bits it takes to represent all of the states
 	// For example, 5 states require 3 bits to represent.
 	_getStateWidth() {
-		var length = this.graph.GetElements().length;
+		var length = this.graph.GetStates().length;
 		if (length <= 2)
 			return 1;
 		else
@@ -47,7 +47,7 @@
 	}
 	_getEnumText() {
 		let enum_text = "typedef enum bit " + this._getBitRange() + " {\n";
-		const state_list = this.graph.GetElements();
+		const state_list = this.graph.GetStates();
 		let state_index;
 		for (state_index in state_list) {
 			const state = state_list[state_index];
@@ -67,7 +67,7 @@
 		//for (stateName in this.stateDict){
 		//  text += this.stateDict[stateName].transitionText;
 		//}
-		const state_list = this.graph.GetElements();
+		const state_list = this.graph.GetStates();
 		let state_index;
 		for (state_index in state_list) {
 			const state = state_list[state_index];
@@ -110,44 +110,77 @@
 		return text;
 	}
 
+	// Get the output text for a single state.
+	_getStateOutputText(state) {
+		let text = `\t\t${this.graph.GetCellText(state)} : begin\n`;
+		let t_list = this.graph.GetOutputLinks(state, { "outbound": true });
+
+		// Trim out transitions with no target
+		t_list = t_list.filter(function (x) { return x.getTargetElement() !== null; });
+
+		let t_index;
+		const condition_target_list = {};
+		// Group output conditions;
+		for (t_index in t_list) {
+			if (t_list.hasOwnProperty(t_index)) {
+				const t = t_list[t_index];
+				let condition = this.graph.GetCellText(t);
+				const target = this.graph.GetCellText(t.getTargetElement());
+
+				if (condition === "") {
+					condition = "default";
+				}
+				
+				if (condition_target_list.hasOwnProperty(condition)) {
+					condition_target_list[condition] += `\n\t\t\t\t${target};`;
+				} else {
+					condition_target_list[condition] = target + ";";
+				}
+			}
+		}
+
+		if (condition_target_list.hasOwnProperty("default")) {
+			text += `\t\t\t${condition_target_list["default"]}\n`;
+		}
+
+		// Generate text
+		let first = true;
+		for (t_index in condition_target_list) {
+			if (condition_target_list.hasOwnProperty(t_index)) {
+				if (t_index === "default") {
+					continue;
+				}
+				text += "\t\t\t";
+				if (!first) {
+					text += "else ";
+				}
+				first = false;
+				text += `if ( ${t_index} ) begin:\n`;
+				text += `\t\t\t\t${condition_target_list[t_index]}\n`;
+				text += "\t\t\tend\n";
+			}
+		}
+		text += "\t\tend\n\n";
+		return text;
+	}
+
 	_getOutputText() {
-		let record;
-		const state_dict = {};
-		const default_state = {};
-		let index;
-		let state_id;
-		for (index in w2ui['grid'].records) {
-			record = w2ui['grid'].records[index];
-			default_state[record.variable] = record['default'];
-			for (state_id in record) {
-				if (state_id != 'variable' && state_id != 'default' && state_id != 'changes') {
-					if (!state_dict[state_id])
-						state_dict[state_id] = {}
-					state_dict[state_id][record.variable] = record[state_id];
-				}
-			}
-		}
 		let text = "always_comb begin\n";
-		let variable;
-		for (variable in default_state) {
-			text += "\t" + variable + " = " + default_state[variable] + ";\n";
-		}
 		text += "\n\tcase(state)\n";
-		for (state_id in state_dict) {
-			if (state_id == 'recid')
-				continue;
-			const state_name = this.graph.GetCellText(this.graph.GetCell(state_id));
-			text += "\t\t" + state_name + ": begin\n";
-			for (variable in state_dict[state_id]) {
-				const expression = state_dict[state_id][variable];
-				if (expression != "") {
-					text += "\t\t\t" + variable + " = " + expression + ";\n";
-				}
+
+		// Create output states
+		const state_list = this.graph.GetStates();
+		let state_index;
+		for (state_index in state_list) {
+			if (state_list.hasOwnProperty(state_index)) {
+				const state = state_list[state_index];
+				text += this._getStateOutputText(state);
 			}
-			text += "\t\tend\n\n";
 		}
+
 		text += "\tendcase\n";
 		text += "end\n";
+
 		return text;
 	}
 

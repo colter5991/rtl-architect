@@ -77,22 +77,18 @@ class JointGraph extends IGraph {
 		const t_list = this.graph.getConnectedLinks(element, opt);
 
 		// Trim out links that aren't transitions
-		t_list.filter(function (x) { return x.attributes.type !== "fsa.Arrow" });
-
-		return t_list;
+		return t_list.filter(function (x) { return x.attributes.type === "fsa.Arrow" });
 	}
 
 	GetOutputLinks(element, opt) {
 		const t_list = this.graph.getConnectedLinks(element, opt);
 
 		// Trim out links that aren't transitions
-		t_list.filter(function (x) { return x.attributes.type !== "fsa.OutputTransition" });
-
-		return t_list;
+		return t_list.filter(function (x) { return x.attributes.type === "fsa.OutputTransition" });
 	}
 
-	GetElements() {
-		return this.graph.getElements();
+	GetStates() {
+		return this.graph.getElements().filter(function (x) { return x.attributes.type === "fsa.State" });
 	}
 
 	GetCell(state_id) {
@@ -126,13 +122,14 @@ class JointGraph extends IGraph {
 	}
 
 	// Create a new State View
-	NewState(xpos, ypos, name, output=false) {
+	NewState(xpos, ypos, name, output_color, output=false) {
 		if (output) {
 			var state = new Joint.shapes.output.Element({
 				position: { x: xpos, y: ypos },
 				size: { width: 100, height: 40 },
 				attrs: { text: { text: name } }
 			});
+			state.attr("rect/stroke", output_color);
 		} else {
 			var state = new Joint.shapes.fsa.State({
 				position: { x: xpos, y: ypos },
@@ -156,7 +153,7 @@ class JointGraph extends IGraph {
 		if (state.attributes.type === "fsa.State") {
 			state.attr("circle/stroke", stroke);
 		} else if (state.attributes.type === "fsa.Output") {
-			state.attr("rect/stroke", stroke);
+			state.attr("rect/stroke", output_color);
 		} else if (state.attributes.type === "fsa.OutputTransition") {
 			state.attr({ '.connection': { stroke: output_color } });
 		} else {
@@ -173,7 +170,7 @@ class JointGraph extends IGraph {
 	}
 
 	// Make a new link
-	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target, output=false) {
+	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target, output_color, output=false) {
 		let  cell;
 		if (output) {
 			cell = new Joint.shapes.outputTransition.Element({
@@ -215,7 +212,7 @@ class JointGraph extends IGraph {
 
 	GetStateNames() {
 		const state_names = [];
-		const elements = this.graph.getElements();
+		const elements = this.GetStates();
 		for (let state = 0; state < elements.length; state++) {
 			state_names.push({id: state, name: this.GetCellText(elements[state]) });
 		}
