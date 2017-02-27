@@ -166,12 +166,20 @@
 
 	_getOutputText() {
 		let text = "always_comb begin\n";
+
+		const defaults = this.graph.GetDefaultOutputs();
+		for (let defaul in defaults) {
+			if (defaults.hasOwnProperty(defaul)) {
+				const default_text = this.graph.GetCellText(defaults[defaul]);
+				text += `\t${default_text};\n`;
+			}
+		}
+
 		text += "\n\tcase(state)\n";
 
 		// Create output states
 		const state_list = this.graph.GetStates();
-		let state_index;
-		for (state_index in state_list) {
+		for (let state_index in state_list) {
 			if (state_list.hasOwnProperty(state_index)) {
 				const state = state_list[state_index];
 				text += this._getStateOutputText(state);

@@ -34,6 +34,13 @@ class IGraph {
 	}
 
 	// Following the format of:
+	// http://resources.jointjs.com/docs/jointjs/v1.0/joint.html#dia.Graph.prototype.getElements
+	// Should return a list of default outputs
+	GetDefaultOutputs() {
+		return this;
+	}
+
+	// Following the format of:
 	// http://resources.jointjs.com/docs/jointjs/v1.0/joint.html#dia.Graph.prototype.getCell
 	// Should return a state
 	GetCell(state_id) {

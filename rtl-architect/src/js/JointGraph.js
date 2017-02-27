@@ -91,6 +91,11 @@ class JointGraph extends IGraph {
 		return this.graph.getElements().filter(function (x) { return x.attributes.type === "fsa.State" });
 	}
 
+	GetDefaultOutputs() {
+		return this.graph.getElements().filter(function (x) { return x.attributes.type === "fsa.Output"
+			&& this.graph.getConnectedLinks(x, { "inbound": true }).length === 0 }.bind(this));
+	}
+
 	GetCell(state_id) {
 		return this.graph.getCell(state_id);
 	}
