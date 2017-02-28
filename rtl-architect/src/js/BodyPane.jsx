@@ -1,6 +1,6 @@
 // BSD License
 import React from "react";
-import ReactDOM from 'react-dom';
+import ReactDom from "react-dom";
 
 // MIT License
 import SplitPane from "react-split-pane";
@@ -54,25 +54,28 @@ class BodyPane extends React.Component {
 		this._handleFileNameChange = this._handleFileNameChange.bind(this);
 		this._getStateNames = this._getStateNames.bind(this);
 		this._handleTransitionChangeSource = this._handleTransitionChangeSource.bind(this);
-		this._handleTransitionChangeTarget = this._handleTransitionChangeTarget.bind(this);
+		this._handleChangeNextStateLogic = this._handleChangeNextStateLogic.bind(this);
+		this._handleChangeOutputLogic = this._handleChangeOutputLogic.bind(this);
 		
 		window.onresize = this._handleResizeWindow;
 
 		this.graph = null;
 		this.verilog_converter = null;
 		this.state = {
-			edge: "Positive",      // Whether the clock edge is positive, negative, or both
-			reset: "Active High",  // Whether the reset signal is active high or active low
-			initial_state: "FOO",     // The name of the initial state
-			verilog_text: "",      // The Verilog code that is shown in the verilog panel
-			active_cell: null,      // The currently active cell object
+			edge: "Positive", // Whether the clock edge is positive, negative, or both
+			reset: "Active High", // Whether the reset signal is active high or active low
+			initial_state: "FOO", // The name of the initial state
+			verilog_text: "", // The Verilog code that is shown in the verilog panel
+			active_cell: null, // The currently active cell object
 			drag_mouse_x: 0,
 			drag_mouse_y: 0,
 			dragging: false,
 			scale: 1,
 			show_settings: false,
-			file_name: ""
-		};
+			file_name: "",
+			next_state_logic: true,
+			output_logic: true
+	};
 	}
 
 	componentDidMount() {
@@ -122,8 +125,8 @@ class BodyPane extends React.Component {
 	}
 
 	_newOutput(source, target, condition, output) {
-		this.graph.NewTransition(source, target, condition, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, this.INACTIVE_OUTPUT_COLOR, true);
-		this.graph.NewState(target.x, target.y, output, this.INACTIVE_OUTPUT_COLOR, true);
+		const state = this.graph.NewState(target.x, target.y, output, this.INACTIVE_OUTPUT_COLOR, true);
+		this.graph.NewTransition(source, state, condition, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, this.INACTIVE_OUTPUT_COLOR, true);
 	}
 
 	// Handle clicks (mainly select active element)
@@ -154,6 +157,9 @@ class BodyPane extends React.Component {
 		this._newTransition(s3, s1, "(z[2] == y) && (x != y)", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 		this._newTransition(s2, s4, "w & z & !x", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 		this._newTransition(s4, s1, "z | w | (z ^ x)", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+
+		this._newOutput(s1, { x: 250, y: 20 }, "x == 1", "E = 1");
+
 		this._updateVerilog();
 	}
 
@@ -178,13 +184,13 @@ class BodyPane extends React.Component {
 				break;
 			case 65: // Letter a 
 				if (event.ctrlKey && event.shiftKey) {
-					this._newTransition({ x: 0, y: 0 }, { x: 100, y: 100 }, 'x==1 && y==0', this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
+					this._newTransition({ x: 0, y: 0 }, { x: 100, y: 100 }, "x == 1 && y == 0", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 					event.preventDefault();
 				}
 				break;
 			case 79: // Letter o
 				if (event.ctrlKey && event.shiftKey) {
-					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "x==1 && y==0", "E = 1");
+					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "y == 0", "F = 1");
 					event.preventDefault();
 				}
 				break;			case 8:
@@ -260,6 +266,26 @@ class BodyPane extends React.Component {
 
 	_handleTransitionChangeTarget() { }
 
+	_handleChangeNextStateLogic(event) {
+		if (event.target.checked) {
+			this.graph.ShowHideNextStateLogic(true);
+		} else {
+			this.graph.ShowHideNextStateLogic(false);
+		}
+
+		this.setState({ next_state_logic: event.target.checked });
+	}
+
+	_handleChangeOutputLogic(event) {
+		if (event.target.checked) {
+			this.graph.ShowHideOutputLogic(true);
+		} else {
+			this.graph.ShowHideOutputLogic(false);
+		}
+
+		this.setState({ output_logic: event.target.checked });
+	}
+
 	_getStateNames() {
 		if (this.graph === null)
 			return [];
@@ -281,8 +307,8 @@ class BodyPane extends React.Component {
 							<input type="text" id="title-edit" disabled={this.state.active_cell === null} onChange={this._handleEditTitleInput} />
 						</Col>
 						<Col className="logic-checkboxes" sm={3}>
-							<Row><Checkbox inline checked>Show Next State Logic</Checkbox></Row>
-							<Row><Checkbox inline checked>Show Output Logic</Checkbox></Row>
+							<Row><Checkbox inline checked={this.state.next_state_logic} onChange={this._handleChangeNextStateLogic}>Show Next State Logic</Checkbox></Row>
+							<Row><Checkbox inline checked={this.state.output_logic} onChange={this._handleChangeOutputLogic}>Show Output Logic</Checkbox></Row>
 						</Col>
 					</Row>
 					<pre>
@@ -304,7 +330,7 @@ class BodyPane extends React.Component {
 							onHide={() => this.setState({ show_settings: false })}
 							placement="bottom"
 							container={this}
-							target={() => ReactDOM.findDOMNode(this.refs.target)}
+							target={() => ReactDom.findDOMNode(this.refs.target)}
 						>
 							<SettingsMenu handleEdge={this._handleClockEdge} clockEdge={this.state.edge}
 								reset={this.state.reset} initialState={this.state.initial_state}

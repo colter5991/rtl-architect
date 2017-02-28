@@ -224,6 +224,50 @@ class JointGraph extends IGraph {
 
 		return state_names;
 	}
+
+	ShowHideNextStateLogic(show) {
+		const links = this.graph.getLinks();
+		const t_list = links.filter(function (x) { return x.attributes.type === "fsa.Arrow" });
+
+		for (let link in t_list) {
+			if (t_list.hasOwnProperty(link)) {
+				if (show) {
+					//t_list[link].removeAttr("./display");
+					t_list[link].attr("./display", "");
+				} else {
+					t_list[link].attr("./display", "none");
+				}	
+			}
+		}
+	}
+
+	ShowHideOutputLogic(show) {
+		const links = this.graph.getLinks();
+		const t_list = links.filter(function (x) { return x.attributes.type === "fsa.OutputTransition" });
+
+		for (let link in t_list) {
+			if (t_list.hasOwnProperty(link)) {
+				if (show) {
+					t_list[link].attr("./display", "");
+				} else {
+					t_list[link].attr("./display", "none");
+				}	
+			}
+		}
+
+		const outputs = this.graph.getElements();
+		const s_list = outputs.filter(function (x) { return x.attributes.type === "fsa.Output" });
+
+		for (let output in s_list) {
+			if (s_list.hasOwnProperty(output)) {
+				if (show) {
+					s_list[output].attr("./display", "");
+				} else {
+					s_list[output].attr("./display", "none");
+				}	
+			}
+		}
+	}
 }
 
 export default JointGraph;
