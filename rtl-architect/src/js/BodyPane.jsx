@@ -6,6 +6,9 @@ import ReactDOM from 'react-dom';
 import SplitPane from "react-split-pane";
 import "SplitPane.css";
 import Button from "react-bootstrap/lib/Button";
+import Checkbox from "react-bootstrap/lib/Checkbox";
+import Row from "react-bootstrap/lib/Row";
+import Col from "react-bootstrap/lib/Col";
 import ButtonToolbar from "react-bootstrap/lib/ButtonToolbar";
 import Overlay from "react-bootstrap/lib/Overlay";
 import Glyphicon from "react-bootstrap/lib/Glyphicon";
@@ -270,16 +273,24 @@ class BodyPane extends React.Component {
 					defaultSize={document.documentElement.clientWidth / 2}
 					primary="second">
 				<div className="window" id="next-state">
-					<div className="next-state-menu">
-						<h2>Next State Logic <span><input type="text" id="title-edit" disabled={this.state.active_cell === null} onChange={this._handleEditTitleInput} /></span></h2>
-					</div>
-						<pre>
-							<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
-								onKeyDown={this._handleKeyDown} onWheel={this._handleScroll}>
-								<ReactElementResize id="paper-resize" debounceTimeout={10} onResize={this._handleResizeWindow}></ReactElementResize>
-							</div>
-						</pre>
-						<div id="grid"></div>
+					<Row className="next-state-menu">
+						<Col className="logic-checkboxes" sm={5}>
+							<h2>Next State Logic</h2> 
+						</Col>
+						<Col className="logic-checkboxes" sm={4}>
+							<input type="text" id="title-edit" disabled={this.state.active_cell === null} onChange={this._handleEditTitleInput} />
+						</Col>
+						<Col className="logic-checkboxes" sm={3}>
+							<Row><Checkbox inline checked>Show Next State Logic</Checkbox></Row>
+							<Row><Checkbox inline checked>Show Output Logic</Checkbox></Row>
+						</Col>
+					</Row>
+					<pre>
+						<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
+							onKeyDown={this._handleKeyDown} onWheel={this._handleScroll}>
+							<ReactElementResize id="paper-resize" debounceTimeout={10} onResize={this._handleResizeWindow}></ReactElementResize>
+						</div>
+					</pre>
 				</div>
 				<div className="window">
 					<h2>Verilog Code 
