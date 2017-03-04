@@ -51,6 +51,8 @@
 
 #title-edit {
 	margin-top: 20px;
+	position: absolute;
+	z-index: 1;
 }
 
 #dropdown-span {

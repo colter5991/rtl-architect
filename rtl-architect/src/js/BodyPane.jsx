@@ -136,6 +136,9 @@ class BodyPane extends React.Component {
 		const cell = this.graph.HandleCellClick(cell_view, this.ACTIVE_COLOR);
 		this.setState({active_cell: cell});
 		document.getElementById("title-edit").value = this.graph.GetCellText(this.state.active_cell);
+
+		const position = this.graph.GetCellPosition(this.state.active_cell, this.state.scale);
+		$("#title-edit").offset({left: position.x, top: position.y});
 	}
 
 	// Handle clicking on nothing
@@ -303,14 +306,13 @@ class BodyPane extends React.Component {
 						<Col className="logic-checkboxes" sm={5}>
 							<h2>Next State Logic</h2> 
 						</Col>
-						<Col className="logic-checkboxes" sm={4}>
-							<input type="text" id="title-edit" disabled={this.state.active_cell === null} onChange={this._handleEditTitleInput} />
-						</Col>
+						<Col sm={4}></Col>
 						<Col className="logic-checkboxes" sm={3}>
 							<Row><Checkbox inline checked={this.state.next_state_logic} onChange={this._handleChangeNextStateLogic}>Show Next State Logic</Checkbox></Row>
 							<Row><Checkbox inline checked={this.state.output_logic} onChange={this._handleChangeOutputLogic}>Show Output Logic</Checkbox></Row>
 						</Col>
 					</Row>
+					<input type="text" id="title-edit" hidden={this.state.active_cell === null} onChange={this._handleEditTitleInput} />
 					<pre>
 						<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
 							onKeyDown={this._handleKeyDown} onWheel={this._handleScroll}>

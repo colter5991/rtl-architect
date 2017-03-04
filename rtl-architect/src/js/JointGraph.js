@@ -268,6 +268,30 @@ class JointGraph extends IGraph {
 			}
 		}
 	}
+
+	GetCellPosition(active_cell, scale) {
+		const paper_location = this.paper.$el.offset();
+		const origin = this.paper.options.origin;
+
+		let cell_position;
+		if (active_cell.attributes.type === "fsa.OutputTransition" || active_cell.attributes.type === "fsa.Arrow") {
+			cell_position = {
+				x: (active_cell.getTargetElement().prop("position").x - active_cell.getSourceElement().prop("position").x)
+						* active_cell.attributes.labels[0].position
+					+ active_cell.getSourceElement().prop("position").x,
+				y: (active_cell.getTargetElement().prop("position").y - active_cell.getSourceElement().prop("position").y)
+						* active_cell.attributes.labels[0].position
+					+ active_cell.getSourceElement().prop("position").y
+			}
+		} else {
+			cell_position = active_cell.prop("position");
+		}
+
+		return {
+			x: cell_position.x * scale + origin.x + paper_location.left,
+			y: cell_position.y * scale + origin.y + paper_location.top
+		}
+	}
 }
 
 export default JointGraph;
