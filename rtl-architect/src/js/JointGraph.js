@@ -276,20 +276,19 @@ class JointGraph extends IGraph {
 		let cell_position;
 		if (active_cell.attributes.type === "fsa.OutputTransition" || active_cell.attributes.type === "fsa.Arrow") {
 			cell_position = {
-				x: (active_cell.getTargetElement().prop("position").x - active_cell.getSourceElement().prop("position").x)
-						* active_cell.attributes.labels[0].position
-					+ active_cell.getSourceElement().prop("position").x,
-				y: (active_cell.getTargetElement().prop("position").y - active_cell.getSourceElement().prop("position").y)
-						* active_cell.attributes.labels[0].position
-					+ active_cell.getSourceElement().prop("position").y
+				x: $(active_cell.findView(this.paper)._V.labels.node).offset().left + ($(active_cell.findView(this.paper)._V.labels.node).width() * 0.5),
+				y: $(active_cell.findView(this.paper)._V.labels.node).offset().top + ($(active_cell.findView(this.paper)._V.labels.node).height() * 0.5)
 			}
 		} else {
-			cell_position = active_cell.prop("position");
+			cell_position = {
+				x: (active_cell.prop("position").x + active_cell.prop("size").width * 0.5) * scale + origin.x + paper_location.left,
+				y: (active_cell.prop("position").y + active_cell.prop("size").height * 0.5) * scale + origin.y + paper_location.top
 		}
+	}
 
 		return {
-			x: cell_position.x * scale + origin.x + paper_location.left,
-			y: cell_position.y * scale + origin.y + paper_location.top
+			x: cell_position.x,
+			y: cell_position.y
 		}
 	}
 }
