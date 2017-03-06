@@ -11,6 +11,7 @@ import "jointjs/css/themes/default.css";
 import IGraph from "./IGraph";
 import "./OutputTransition";
 import "./Output";
+import "./DefaultOutput";
 import Utils from "./Utils";
 
 class JointGraph extends IGraph {
@@ -29,22 +30,26 @@ class JointGraph extends IGraph {
 					// Link is an output
 					if (cellViewS && (cellViewS.model.attributes.type === "fsa.Output"
 						|| cellViewS.model.attributes.type === "fsa.Arrow"
-						|| cellViewS.model.attributes.type === "fsa.OutputTransition")) {
+						|| cellViewS.model.attributes.type === "fsa.OutputTransition"
+						|| cellViewS.model.attributes.type === "fsa.DefaultOutput")) {
 						return false;
 					} else if (cellViewT && (cellViewT.model.attributes.type === "fsa.State"
 						|| cellViewT.model.attributes.type === "fsa.Arrow"
-						|| cellViewT.model.attributes.type === "fsa.OutputTransition")) {
+						|| cellViewT.model.attributes.type === "fsa.OutputTransition"
+						|| cellViewT.model.attributes.type === "fsa.DefaultOutput")) {
 						return false;
 					}
 				} else {
 					// Link is a state transition
 					if (cellViewS && (cellViewS.model.attributes.type === "fsa.Output"
 						|| cellViewS.model.attributes.type === "fsa.Arrow"
-						|| cellViewS.model.attributes.type === "fsa.OutputTransition")) {
+						|| cellViewS.model.attributes.type === "fsa.OutputTransition"
+						|| cellViewS.model.attributes.type === "fsa.DefaultOutput")) {
 						return false;
 					} else if (cellViewT && (cellViewT.model.attributes.type === "fsa.Output"
 						|| cellViewT.model.attributes.type === "fsa.Arrow"
-						|| cellViewT.model.attributes.type === "fsa.OutputTransition")) {
+						|| cellViewT.model.attributes.type === "fsa.OutputTransition"
+						|| cellViewT.model.attributes.type === "fsa.DefaultOutput")) {
 						return false;
 					}
 				}
@@ -69,6 +74,8 @@ class JointGraph extends IGraph {
 			return null;
 		if (state.attributes.type === "fsa.State" || state.attributes.type === "fsa.Output")
 			return state.attr("text/text");
+		else if (state.attributes.type === "fsa.DefaultOutput")
+			return state.attr("text.text2/text").substring(1);
 		else
 			return state.label(0).attrs.text.text;
 	}
@@ -92,8 +99,7 @@ class JointGraph extends IGraph {
 	}
 
 	GetDefaultOutputs() {
-		return this.graph.getElements().filter(function (x) { return x.attributes.type === "fsa.Output"
-			&& this.graph.getConnectedLinks(x, { "inbound": true }).length === 0 }.bind(this));
+		return this.graph.getElements().filter(function(x) { return x.attributes.type === "fsa.DefaultOutput" });
 	}
 
 	GetCell(state_id) {
@@ -127,8 +133,18 @@ class JointGraph extends IGraph {
 	}
 
 	// Create a new State View
-	NewState(xpos, ypos, name, output_color, output=false) {
-		if (output) {
+	NewState(xpos, ypos, name, output_color, output=false, default_output=false) {
+		if (default_output) {
+			var state = new Joint.shapes.DefaultOutput.Element({
+				position: { x: xpos, y: ypos },
+				size: { width: 130, height: 55 },
+				attrs: {
+					"text.text1": { text: "Default Outputs:", "y-alignment": "top", "text-anchor": "left", "font-weight": "bold" },
+					"text.text2": { text: `\n${name}` }
+				}
+			});
+			state.attr("rect/stroke", output_color);
+		} else if (output) {
 			var state = new Joint.shapes.output.Element({
 				position: { x: xpos, y: ypos },
 				size: { width: 100, height: 40 },
@@ -154,9 +170,11 @@ class JointGraph extends IGraph {
 	}
 
 	// Set the stroke of the given cell to the given color
-	SetCellStroke(state, stroke, output_color) {
+	SetCellStroke(state, stroke, output_color, default_color) {
 		if (state.attributes.type === "fsa.State") {
 			state.attr("circle/stroke", stroke);
+		} else if (state.attributes.type === "fsa.DefaultOutput") {
+			state.attr("rect/stroke", default_color);
 		} else if (state.attributes.type === "fsa.Output") {
 			state.attr("rect/stroke", output_color);
 		} else if (state.attributes.type === "fsa.OutputTransition") {
@@ -183,6 +201,21 @@ class JointGraph extends IGraph {
 
 			state.resize(new_width, new_height);
 			state.attr("text/text", text);
+		} else if (state.attributes.type === "fsa.DefaultOutput") {
+			// calculate the new width
+			let new_width = 130;
+			if ((Utils.GetLongestLine(text) * 10) + 25 > new_width) {
+				new_width = (Utils.GetLongestLine(text) * 10) + 25;
+			}
+
+			// calculate the new height
+			let new_height = 55;
+			if ((Utils.CountLines(text) + 1) * 15 > new_height) {
+				new_height = (Utils.CountLines(text) + 1) * 15;
+			}
+
+			state.resize(new_width, new_height);
+			state.attr("text.text2/text", `\n${text}`);
 		} else {
 			state.label(0, { attrs: { text: { text: text } } });
 		}
@@ -213,7 +246,7 @@ class JointGraph extends IGraph {
 	}
 
 	HandleCellClick(cell_view, active_color) {
-		this.SetCellStroke(cell_view.model, active_color, active_color);
+		this.SetCellStroke(cell_view.model, active_color, active_color, active_color);
 		return cell_view.model;
 	}
 
@@ -281,6 +314,17 @@ class JointGraph extends IGraph {
 				}	
 			}
 		}
+
+		const default_outputs = this.GetDefaultOutputs();
+		for (let defualt_output in default_outputs) {
+			if (default_outputs.hasOwnProperty(defualt_output)) {
+				if (show) {
+					default_outputs[defualt_output].attr("./display", "");
+				} else {
+					default_outputs[defualt_output].attr("./display", "none");
+				}
+			}
+		}
 	}
 
 	GetCellPosition(active_cell, scale) {
@@ -311,7 +355,7 @@ class JointGraph extends IGraph {
 	}
 
 	LegalizeText(cell, text) {
-		if (cell.attributes.type === "fsa.Output")
+		if (cell.attributes.type === "fsa.Output" || cell.attributes.type === "fsa.DefaultOutput")
 			return text;
 		else if (Utils.CountLines(text) > 1) {
 			return Utils.SplitLinesRejoin(text, "");

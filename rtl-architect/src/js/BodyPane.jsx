@@ -33,6 +33,7 @@ class BodyPane extends React.Component {
 		this.INACTIVE_COLOR = "black"; // The outline color of inactive graph elements
 		this.ACTIVE_COLOR = "blue";    // outline color of the active element
 		this.INACTIVE_OUTPUT_COLOR = "green";
+		this.INACTIVE_DEFAULT_OUTPUT_COLOR = "black";
 		this.PAPERWIDTH = 400;
 		this.PAPERHEIGHT = 600;
 
@@ -78,7 +79,7 @@ class BodyPane extends React.Component {
 			output_logic: true,
 			editting_textarea: false,
 			debounce_timer: 0
-	};
+		};
 	}
 
 	componentDidMount() {
@@ -95,8 +96,7 @@ class BodyPane extends React.Component {
 	}
 
 	_newState(xpos, ypos, name) {
-		const state = this.graph.NewState(xpos, ypos, name, this.INACTIVE_OUTPUT_COLOR);
-		return state;
+		return this.graph.NewState(xpos, ypos, name, this.INACTIVE_OUTPUT_COLOR);
 	}
 
 	_deleteState(state) {
@@ -122,7 +122,7 @@ class BodyPane extends React.Component {
 	// inactivate the current active cell
 	_clearActiveCell() {
 		if (this.state.active_cell) {
-			this.graph.SetCellStroke(this.state.active_cell, this.INACTIVE_COLOR, this.INACTIVE_OUTPUT_COLOR);
+			this.graph.SetCellStroke(this.state.active_cell, this.INACTIVE_COLOR, this.INACTIVE_OUTPUT_COLOR, this.INACTIVE_DEFAULT_OUTPUT_COLOR);
 		}
 	}
 
@@ -130,9 +130,16 @@ class BodyPane extends React.Component {
 		return this.graph.NewTransition(source, target, name, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, this.INACTIVE_OUTPUT_COLOR);
 	}
 
-	_newOutput(source, target, condition, output) {
-		const state = this.graph.NewState(target.x, target.y, output, this.INACTIVE_OUTPUT_COLOR, true);
-		this.graph.NewTransition(source, state, condition, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, this.INACTIVE_OUTPUT_COLOR, true);
+	_newOutput(xpos, ypos, name) {
+		return this.graph.NewState(xpos, ypos, name, this.INACTIVE_OUTPUT_COLOR, true);
+	}
+
+	_newOutputTransition(source, target, condition) {
+		this.graph.NewTransition(source, target, condition, this._handleTransitionChangeSource, this._handleTransitionChangeTarget, this.INACTIVE_OUTPUT_COLOR, true);
+	}
+
+	_newDefaultOutput(xpos, ypos, name) {
+		this.graph.NewState(xpos, ypos, name, this.INACTIVE_DEFAULT_OUTPUT_COLOR, true, true);
 	}
 
 	// Handle clicks (mainly select active element)
@@ -170,7 +177,9 @@ class BodyPane extends React.Component {
 		this._newTransition(s2, s4, "w & z & !x", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 		this._newTransition(s4, s1, "z | w | (z ^ x)", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 
-		this._newOutput(s1, { x: 250, y: 20 }, "x == 1", "E = 1\nF = 0");
+		const output = this._newOutput(250, 20, "E = 1\nF = 0");
+		this._newOutputTransition(s1, output, "x == 1");
+		this._newDefaultOutput(10, 10, "E = 0\nF = 1");
 
 		this._updateVerilog();
 	}
@@ -190,7 +199,7 @@ class BodyPane extends React.Component {
 				break;
 			case 83: // Letter s 
 				if (event.ctrlKey && event.shiftKey) {
-					this._newState(0, 0, "NEW_STATE");
+					this._newState(30, 30, "NEW_STATE");
 					event.preventDefault();
 				}
 				break;
@@ -200,12 +209,25 @@ class BodyPane extends React.Component {
 					event.preventDefault();
 				}
 				break;
-			case 79: // Letter o
+			case 68: // Letter d
 				if (event.ctrlKey && event.shiftKey) {
-					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "y == 0", "G = 1");
+					this._newOutputTransition({ x: 0, y: 0 }, { x: 100, y: 100 }, "y == 0");
 					event.preventDefault();
 				}
-				break;			case 8:
+				break;
+			case 70: // Letter f
+				if (event.ctrlKey && event.shiftKey) {
+					this._newOutput(30, 30, "G = 1");
+					event.preventDefault();
+				}
+				break;
+			case 71: // Letter g
+				if (event.ctrlKey && event.shiftKey) {
+					this._newDefaultOutput(30, 30, "H = 0\nJ = 1");
+					event.preventDefault();
+				}
+				break;
+			case 8:
 				this._editActiveCellString(null); break;
 		}
 		this._updateVerilog();
