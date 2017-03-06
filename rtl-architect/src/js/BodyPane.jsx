@@ -13,8 +13,8 @@ import ButtonToolbar from "react-bootstrap/lib/ButtonToolbar";
 import Overlay from "react-bootstrap/lib/Overlay";
 import Glyphicon from "react-bootstrap/lib/Glyphicon";
 import SettingsMenu from "./SettingsMenu"
-// MIT License
 import {ReactElementResize} from "react-element-resize";
+import Textarea from "react-textarea-autosize";
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
 
@@ -22,6 +22,7 @@ import {ReactElementResize} from "react-element-resize";
 import "BodyPane.css";
 import VerilogConverter from "./VerilogConverter";
 import JointGraph from "./JointGraph";
+import Utils from "./Utils";
 
 // ReSharper disable once PossiblyUnassignedProperty
 class BodyPane extends React.Component {
@@ -74,7 +75,8 @@ class BodyPane extends React.Component {
 			show_settings: false,
 			file_name: "",
 			next_state_logic: true,
-			output_logic: true
+			output_logic: true,
+			editting_textarea: false
 	};
 	}
 
@@ -136,9 +138,6 @@ class BodyPane extends React.Component {
 		const cell = this.graph.HandleCellClick(cell_view, this.ACTIVE_COLOR);
 		this.setState({active_cell: cell});
 		document.getElementById("title-edit").value = this.graph.GetCellText(this.state.active_cell);
-
-		const position = this.graph.GetCellPosition(this.state.active_cell, this.state.scale);
-		$("#title-edit").offset({left: position.x, top: position.y});
 	}
 
 	// Handle clicking on nothing
@@ -147,6 +146,7 @@ class BodyPane extends React.Component {
 		this._clearActiveCell();
 		this._handleDragStart(event.originalEvent);
 		document.getElementById("title-edit").value = "";
+		this.setState({editting_textarea: false});
 	}
 
 	_initGraph() {
@@ -235,10 +235,13 @@ class BodyPane extends React.Component {
 
 	_handleEditTitleInput(event) {
 		this.graph.ReplaceActiveCellString(document.getElementById("title-edit").value, this.state.active_cell);
+		this._moveTextArea();
 	}
 
 	_handleDoubleClick(event) {
 		document.getElementById("title-edit").focus();
+		this._moveTextArea();
+		this.setState({editting_textarea: true});
 	}
 
 	_handleToggleMenu(event) {
@@ -295,6 +298,11 @@ class BodyPane extends React.Component {
 		return this.graph.GetStateNames();
 	}
 
+	_moveTextArea() {
+		const position = this.graph.GetCellPosition(this.state.active_cell, this.state.scale);
+		$("#title-edit").offset({left: position.x - $("#title-edit").width()*0.5 - 5, top: position.y - $("#title-edit").height()*0.5 - 5});
+	}
+
 	render() {
 		return (
 			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
@@ -312,7 +320,11 @@ class BodyPane extends React.Component {
 							<Row><Checkbox inline checked={this.state.output_logic} onChange={this._handleChangeOutputLogic}>Show Output Logic</Checkbox></Row>
 						</Col>
 					</Row>
-					<input type="text" id="title-edit" hidden={this.state.active_cell === null} onChange={this._handleEditTitleInput} />
+					<Textarea id="title-edit" style={this.state.active_cell !== null && this.state.editting_textarea ?
+							{ width: (Utils.GetLongestLine(this.graph.GetCellText(this.state.active_cell)) * 10) + 20 + "px", zIndex: 1 } :
+							{ width: "50px", zIndex: -5 }
+						}
+						wrap="off" hidden={this.state.active_cell === null} onChange={this._handleEditTitleInput}></Textarea>
 					<pre>
 						<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
 							onKeyDown={this._handleKeyDown} onWheel={this._handleScroll}>

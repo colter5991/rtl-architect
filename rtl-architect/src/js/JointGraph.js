@@ -11,6 +11,7 @@ import "jointjs/css/themes/default.css";
 import IGraph from "./IGraph";
 import "./OutputTransition";
 import "./Output";
+import Utils from "./Utils";
 
 class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
@@ -168,10 +169,25 @@ class JointGraph extends IGraph {
 
 	// Set the text of the given cell to the given text
 	_setCellText(state, text) {
-		if (state.attributes.type === "fsa.State" || state.attributes.type === "fsa.Output")
+		if (state.attributes.type === "fsa.State" || state.attributes.type === "fsa.Output") {
+			// calculate the new width
+			let new_width = 100;
+			if ((Utils.GetLongestLine(text) * 10) + 25 > new_width) {
+				new_width = (Utils.GetLongestLine(text) * 10) + 25;
+			}
+
+			// calculate the new height
+			let new_height = 40;
+			const split_str = text.split(/\r|\n/);
+			if (split_str.length * 15 > new_height) {
+				new_height = split_str.length * 15;
+			}
+
+			state.resize(new_width, new_height);
 			state.attr("text/text", text);
-		else
+		} else {
 			state.label(0, { attrs: { text: { text: text } } });
+		}
 	}
 
 	// Make a new link

@@ -50,9 +50,17 @@
 }
 
 #title-edit {
-	margin-top: 20px;
 	position: absolute;
-	z-index: 1;
+	-moz-resize: none;
+	-ms-resize: none;
+	-o-resize: none;
+	resize: none;
+	overflow: auto;
+	-moz-min-width: 100px;
+	-ms-min-width: 100px;
+	-o-min-width: 100px;
+	-webkit-min-width: 100px;
+	min-width: 100px;
 }
 
 #dropdown-span {
