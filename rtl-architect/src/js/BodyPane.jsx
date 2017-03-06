@@ -76,14 +76,15 @@ class BodyPane extends React.Component {
 			file_name: "",
 			next_state_logic: true,
 			output_logic: true,
-			editting_textarea: false
+			editting_textarea: false,
+			debounce_timer: 0
 	};
 	}
 
 	componentDidMount() {
 		// This must be performed after the object has mounted
 		this.graph = new JointGraph(document.getElementById("paper").offsetWidth, document.documentElement.clientHeight - 199,
-			this._handleCellClick, this._handleNothingClick, this._handleDoubleClick, this._updateVerilog); // An IGraph object
+			this._handleCellClick, this._handleNothingClick, this._updateVerilog); // An IGraph object
 		// This object relies on the previous being loaded
 		this.verilog_converter = new VerilogConverter(this.graph);
 		this._initGraph();
@@ -136,10 +137,16 @@ class BodyPane extends React.Component {
 
 	// Handle clicks (mainly select active element)
 	_handleCellClick(cell_view) {
+		const dt = new Date();
+		if (dt.getTime() - this.state.debounce_timer < 200) {
+			this._handleDoubleClick(cell_view);
+			return;
+		}
+
 		$("#paper").focus();
 		this._clearActiveCell();
 		const cell = this.graph.HandleCellClick(cell_view, this.ACTIVE_COLOR);
-		this.setState({active_cell: cell, editting_textarea: false});
+		this.setState({active_cell: cell, editting_textarea: false, debounce_timer: dt.getTime()});
 	}
 
 	// Handle clicking on nothing

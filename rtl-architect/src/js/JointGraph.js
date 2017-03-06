@@ -15,7 +15,7 @@ import Utils from "./Utils";
 
 class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
-	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler, double_click_handler, update_handler) {
+	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler, update_handler) {
 		super();
 		this.graph = new Joint.dia.Graph();
 		this.paper = new Joint.dia.Paper({
@@ -53,7 +53,6 @@ class JointGraph extends IGraph {
 			}
 		});
 
-		this.paper.on('cell:pointerdblclick', double_click_handler);
 		this.paper.on('cell:pointerdown', cell_click_handler);
 		this.paper.on('blank:pointerdown', nothing_click_handler);
 		this.graph.on('change', function() {
