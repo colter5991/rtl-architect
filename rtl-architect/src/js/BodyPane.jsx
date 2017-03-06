@@ -99,6 +99,9 @@ class BodyPane extends React.Component {
 	}
 
 	_deleteState(state) {
+		if (state === null)
+			return;
+
 		if (this.graph.GetCellText(state) === this.state.initial_state) {
 			this.setState({ initial_state: "" });
 		}
@@ -117,9 +120,9 @@ class BodyPane extends React.Component {
 
 	// inactivate the current active cell
 	_clearActiveCell() {
-		if (this.state.active_cell)
+		if (this.state.active_cell) {
 			this.graph.SetCellStroke(this.state.active_cell, this.INACTIVE_COLOR, this.INACTIVE_OUTPUT_COLOR);
-		this.setState({ active_cell: null });
+		}
 	}
 
 	_newTransition(source, target, name) {
@@ -136,8 +139,7 @@ class BodyPane extends React.Component {
 		$("#paper").focus();
 		this._clearActiveCell();
 		const cell = this.graph.HandleCellClick(cell_view, this.ACTIVE_COLOR);
-		this.setState({active_cell: cell});
-		document.getElementById("title-edit").value = this.graph.GetCellText(this.state.active_cell);
+		this.setState({active_cell: cell, editting_textarea: false});
 	}
 
 	// Handle clicking on nothing
@@ -146,7 +148,7 @@ class BodyPane extends React.Component {
 		this._clearActiveCell();
 		this._handleDragStart(event.originalEvent);
 		document.getElementById("title-edit").value = "";
-		this.setState({editting_textarea: false});
+		this.setState({editting_textarea: false, active_cell: null});
 	}
 
 	_initGraph() {
@@ -161,7 +163,7 @@ class BodyPane extends React.Component {
 		this._newTransition(s2, s4, "w & z & !x", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 		this._newTransition(s4, s1, "z | w | (z ^ x)", this._handleTransitionChangeSource, this._handleTransitionChangeTarget);
 
-		this._newOutput(s1, { x: 250, y: 20 }, "x == 1", "E = 1");
+		this._newOutput(s1, { x: 250, y: 20 }, "x == 1", "E = 1\nF = 0");
 
 		this._updateVerilog();
 	}
@@ -193,7 +195,7 @@ class BodyPane extends React.Component {
 				break;
 			case 79: // Letter o
 				if (event.ctrlKey && event.shiftKey) {
-					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "y == 0", "F = 1");
+					this._newOutput({ x: 0, y: 0 }, { x: 100, y: 100 }, "y == 0", "G = 1");
 					event.preventDefault();
 				}
 				break;			case 8:
@@ -234,13 +236,13 @@ class BodyPane extends React.Component {
 	}
 
 	_handleEditTitleInput(event) {
+		document.getElementById("title-edit").value = this.graph.LegalizeText(this.state.active_cell, event.target.value);
 		this.graph.ReplaceActiveCellString(document.getElementById("title-edit").value, this.state.active_cell);
-		this._moveTextArea();
 	}
 
-	_handleDoubleClick(event) {
+	_handleDoubleClick(cell_view) {
+		document.getElementById("title-edit").value = this.graph.GetCellText(this.graph.GetCell(cell_view));
 		document.getElementById("title-edit").focus();
-		this._moveTextArea();
 		this.setState({editting_textarea: true});
 	}
 
@@ -298,11 +300,6 @@ class BodyPane extends React.Component {
 		return this.graph.GetStateNames();
 	}
 
-	_moveTextArea() {
-		const position = this.graph.GetCellPosition(this.state.active_cell, this.state.scale);
-		$("#title-edit").offset({left: position.x - $("#title-edit").width()*0.5 - 5, top: position.y - $("#title-edit").height()*0.5 - 5});
-	}
-
 	render() {
 		return (
 			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
@@ -314,17 +311,25 @@ class BodyPane extends React.Component {
 						<Col className="logic-checkboxes" sm={5}>
 							<h2>Next State Logic</h2> 
 						</Col>
-						<Col sm={4}></Col>
-						<Col className="logic-checkboxes" sm={3}>
+						<Col sm={3}></Col>
+						<Col className="logic-checkboxes" sm={4}>
 							<Row><Checkbox inline checked={this.state.next_state_logic} onChange={this._handleChangeNextStateLogic}>Show Next State Logic</Checkbox></Row>
 							<Row><Checkbox inline checked={this.state.output_logic} onChange={this._handleChangeOutputLogic}>Show Output Logic</Checkbox></Row>
 						</Col>
 					</Row>
-					<Textarea id="title-edit" style={this.state.active_cell !== null && this.state.editting_textarea ?
-							{ width: (Utils.GetLongestLine(this.graph.GetCellText(this.state.active_cell)) * 10) + 20 + "px", zIndex: 1 } :
-							{ width: "50px", zIndex: -5 }
+					<textarea id="title-edit" style={this.state.active_cell !== null && this.state.editting_textarea ?
+							{
+								width: (Utils.GetLongestLine(this.graph.GetCellText(this.state.active_cell)) * 10) + 20 + "px",
+								height: Utils.CountLines(this.graph.GetCellText(this.state.active_cell)) * 20 + 10,
+								left: this.graph.GetCellPosition(this.state.active_cell, this.state.scale).x
+									- ((Utils.GetLongestLine(this.graph.GetCellText(this.state.active_cell)) * 10) + 20)*0.5 - 10 + "px",
+								top: this.graph.GetCellPosition(this.state.active_cell, this.state.scale).y
+									- (Utils.CountLines(this.graph.GetCellText(this.state.active_cell)) * 20 + 10)*0.5 - 100 + "px",
+								zIndex: 1
+							} :
+							{ width: "50px", height: "20px", left: "-10000px", top: "-10000px", zIndex: -1 }
 						}
-						wrap="off" hidden={this.state.active_cell === null} onChange={this._handleEditTitleInput}></Textarea>
+						wrap="off" onChange={this._handleEditTitleInput}></textarea>
 					<pre>
 						<div id="paper" className="paper" tabIndex="0" onKeyPress={this._handleKeyPress}
 							onKeyDown={this._handleKeyDown} onWheel={this._handleScroll}>

@@ -1,4 +1,6 @@
-﻿class VerilogConverter {
+﻿import Utils from "./Utils";
+
+class VerilogConverter {
 	constructor(graph) {
 		this.graph = graph;
 	}
@@ -127,14 +129,16 @@
 				let condition = this.graph.GetCellText(t);
 				const target = this.graph.GetCellText(t.getTargetElement());
 
+				let appendage = "\n\t\t\t\t";
 				if (condition === "") {
 					condition = "default";
+					appendage = "\n\t\t\t";
 				}
 				
 				if (condition_target_list.hasOwnProperty(condition)) {
-					condition_target_list[condition] += `\n\t\t\t\t${target};`;
+					condition_target_list[condition] += `${appendage + Utils.SplitLinesRejoin(target, ";" + appendage)};`;
 				} else {
-					condition_target_list[condition] = target + ";";
+					condition_target_list[condition] = Utils.SplitLinesRejoin(target, ";" + appendage) + ";";
 				}
 			}
 		}
@@ -171,7 +175,7 @@
 		for (let defaul in defaults) {
 			if (defaults.hasOwnProperty(defaul)) {
 				const default_text = this.graph.GetCellText(defaults[defaul]);
-				text += `\t${default_text};\n`;
+				text += `\t${Utils.SplitLinesRejoin(default_text, ";\n\t")};\n`;
 			}
 		}
 

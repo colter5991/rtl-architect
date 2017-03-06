@@ -178,9 +178,8 @@ class JointGraph extends IGraph {
 
 			// calculate the new height
 			let new_height = 40;
-			const split_str = text.split(/\r|\n/);
-			if (split_str.length * 15 > new_height) {
-				new_height = split_str.length * 15;
+			if (Utils.CountLines(text) * 15 > new_height) {
+				new_height = Utils.CountLines(text) * 15;
 			}
 
 			state.resize(new_width, new_height);
@@ -299,12 +298,26 @@ class JointGraph extends IGraph {
 			cell_position = {
 				x: (active_cell.prop("position").x + active_cell.prop("size").width * 0.5) * scale + origin.x + paper_location.left,
 				y: (active_cell.prop("position").y + active_cell.prop("size").height * 0.5) * scale + origin.y + paper_location.top
+			}
 		}
-	}
 
 		return {
 			x: cell_position.x,
 			y: cell_position.y
+		}
+	}
+
+	GetCell(cell_view) {
+		return cell_view.model;
+	}
+
+	LegalizeText(cell, text) {
+		if (cell.attributes.type === "fsa.Output")
+			return text;
+		else if (Utils.CountLines(text) > 1) {
+			return Utils.SplitLinesRejoin(text, "");
+		} else {
+			return text;
 		}
 	}
 }

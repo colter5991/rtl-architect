@@ -14,6 +14,16 @@
 
 		return max_length;
 	}
+
+	static CountLines(str) {
+		const split_str = str.split(/\r|\n/);
+
+		return split_str.length;
+	}
+
+	static SplitLinesRejoin(str, rejoin_pattern) {
+		return str.split(/\r|\n/).join(rejoin_pattern);
+	}
 }
 
 export default Utils;
