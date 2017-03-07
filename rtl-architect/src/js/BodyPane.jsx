@@ -10,11 +10,12 @@ import Checkbox from "react-bootstrap/lib/Checkbox";
 import Row from "react-bootstrap/lib/Row";
 import Col from "react-bootstrap/lib/Col";
 import ButtonToolbar from "react-bootstrap/lib/ButtonToolbar";
+import DropdownButton from "react-bootstrap/lib/DropdownButton";
+import MenuItem from "react-bootstrap/lib/MenuItem";
 import Overlay from "react-bootstrap/lib/Overlay";
 import Glyphicon from "react-bootstrap/lib/Glyphicon";
 import SettingsMenu from "./SettingsMenu"
 import {ReactElementResize} from "react-element-resize";
-import Textarea from "react-textarea-autosize";
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
 
@@ -254,8 +255,8 @@ class BodyPane extends React.Component {
 	}
 
 	_handleMouseUp(event) {
-		this.setState({dragging: false});
 		this._updateVerilog();
+		this.setState({dragging: false});
 	}
 
 	_handleScroll(event) {
@@ -331,17 +332,30 @@ class BodyPane extends React.Component {
 
 	render() {
 		return (
-			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "all-scroll"} : {}}>
+			<div className="root" onMouseUp={this._handleMouseUp} onMouseMove={this._handleDrag} style={this.state.dragging ? {cursor: "move"} : {}}>
 			<SplitPane split="vertical" minSize={300}
 					defaultSize={document.documentElement.clientWidth / 2}
 					primary="second">
 				<div className="window" id="next-state">
 					<Row className="next-state-menu">
-						<Col className="logic-checkboxes" sm={5}>
+						<Col sm={5}>
 							<h2>Next State Logic</h2> 
 						</Col>
-						<Col sm={3}></Col>
-						<Col className="logic-checkboxes" sm={4}>
+						<Col sm={3}>
+							<ButtonToolbar className="graph-toolbar">
+								<DropdownButton title={<Glyphicon glyph="plus" />} noCaret id="add-button">
+									<MenuItem onClick={() => this._newState(30, 30, "NEW_STATE")} eventKey="1">New State</MenuItem>
+									<MenuItem onClick={() => this._newTransition({ x: 0, y: 0 }, { x: 100, y: 100 }, "x == 1 && y == 0", this._handleTransitionChangeSource, this._handleTransitionChangeTarget)} eventKey="2">New Transition</MenuItem>
+									<MenuItem onClick={() => this._newOutput(30, 30, "G = 1")} eventKey="3">New Output</MenuItem>
+									<MenuItem onClick={() => this._newOutputTransition({ x: 0, y: 0 }, { x: 100, y: 100 }, "y == 0")} eventKey="3">New Output Condition</MenuItem>
+									<MenuItem onClick={() => this._newDefaultOutput(30, 30, "H = 0\nJ = 1")} eventKey="4">New Default Output</MenuItem>
+								</DropdownButton>
+								<Button disabled={this.state.active_cell === null} onClick={() => this._deleteState(this.state.active_cell)}>
+									<Glyphicon glyph="remove" style={this.state.active_cell !== null ? {color: "crimson"} : {}} />
+								</Button>
+							</ButtonToolbar>
+						</Col>
+						<Col sm={4} className="logic-checkboxes">
 							<Row><Checkbox inline checked={this.state.next_state_logic} onChange={this._handleChangeNextStateLogic}>Show Next State Logic</Checkbox></Row>
 							<Row><Checkbox inline checked={this.state.output_logic} onChange={this._handleChangeOutputLogic}>Show Output Logic</Checkbox></Row>
 						</Col>
@@ -368,30 +382,30 @@ class BodyPane extends React.Component {
 				</div>
 				<div className="window">
 					<h2>Verilog Code 
-					<span id="dropdown-span"><ButtonToolbar>
-					<Button ref="target" onClick={this._handleToggleMenu} id="dropdown-settings">
-						<Glyphicon glyph="cog" style={this.state.initial_state === "" ? {color: "red"} : {}} />
-						<Overlay
-							animation={false}
-							rootClose
-							show={this.state.show_settings}
-							onHide={() => this.setState({ show_settings: false })}
-							placement="bottom"
-							container={this}
-							target={() => ReactDom.findDOMNode(this.refs.target)}
-						>
-							<SettingsMenu handleEdge={this._handleClockEdge} clockEdge={this.state.edge}
-								reset={this.state.reset} initialState={this.state.initial_state}
-								handleReset={this._handleReset} handleInitialState={this._handleInitialState}
-								stateNames={this._getStateNames()} handleFileNameChange={this._handleFileNameChange} 
-								fileNameValue={this.state.file_name}
-						/>
-						</Overlay>
-					</Button>
-					<Button href={`data:text/plain;charset=utf-8,${encodeURIComponent(this.state.verilog_text)}`} download={this.state.file_name === "" ? "StateMachine.sv" : this.state.file_name}>
-						<Glyphicon glyph="download-alt" />
-					</Button>
-					</ButtonToolbar></span>
+					<ButtonToolbar className="options-toolbar">
+						<Button ref="target" onClick={this._handleToggleMenu} id="dropdown-settings">
+							<Glyphicon glyph="cog" style={this.state.initial_state === "" ? {color: "red"} : {}} />
+							<Overlay
+								animation={false}
+								rootClose
+								show={this.state.show_settings}
+								onHide={() => this.setState({ show_settings: false })}
+								placement="bottom"
+								container={this}
+								target={() => ReactDom.findDOMNode(this.refs.target)}
+							>
+								<SettingsMenu handleEdge={this._handleClockEdge} clockEdge={this.state.edge}
+									reset={this.state.reset} initialState={this.state.initial_state}
+									handleReset={this._handleReset} handleInitialState={this._handleInitialState}
+									stateNames={this._getStateNames()} handleFileNameChange={this._handleFileNameChange} 
+									fileNameValue={this.state.file_name}
+							/>
+							</Overlay>
+						</Button>
+						<Button href={`data:text/plain;charset=utf-8,${encodeURIComponent(this.state.verilog_text)}`} download={this.state.file_name === "" ? "StateMachine.sv" : this.state.file_name}>
+							<Glyphicon glyph="download-alt" />
+						</Button>
+					</ButtonToolbar>
 					</h2>
 					<div id="verilog"><pre>{this.state.verilog_text}</pre></div>
 				</div>

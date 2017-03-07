@@ -59,7 +59,16 @@
 	min-width: 50px;
 }
 
-#dropdown-span {
+.options-toolbar {
 	float: right;
 	margin-right: 10px;
+}
+
+.graph-toolbar {
+	float: right;
+	margin-top: 20px;
+}
+
+.logic-checkboxes {
+	padding-top: 15px;
 }
