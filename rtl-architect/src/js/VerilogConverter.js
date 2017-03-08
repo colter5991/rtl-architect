@@ -8,22 +8,26 @@ class VerilogConverter {
 	// Get the transition text for a single state.  That is the case statement
 	// block with the big ol' if/else if structure to choose the nextState.
 	_getStateTransitionText(state) {
-		let text = "\t\t" + this.graph.GetCellText(state) + ' : begin\n';
+		let text = `\t\t${this.graph.GetCellText(state)} : begin\n`;
 		let t_list = this.graph.GetTransitionLinks(state, { "outbound": true });
 
 		// Trim out transitions with no target
 		t_list = t_list.filter(function (x) { return x.getTargetElement() != null; });
 
 		// Generate text
-		let t_index;
-		for (t_index in t_list) {
-			const t = t_list[t_index];
-			const condition = this.graph.GetCellText(t);
-			const target = this.graph.GetCellText(t.getTargetElement());
-			text += "\t\t\t";
-			if (t_index != 0) { text += "else "; }
-			text += "if ( " + condition + " )\n"
-			text += "\t\t\t\tnextState = " + target + ";\n";
+		for (let t_index in t_list) {
+			if (t_list.hasOwnProperty(t_index)) {
+				const t = t_list[t_index];
+				const condition = this.graph.GetCellText(t);
+				const target = this.graph.GetCellText(t.getTargetElement());
+				text += "\t\t\t";
+				// ReSharper disable once ConditionIsAlwaysConst
+				if (t_index !== 0) {
+					text += "else ";
+				}
+				text += `if ( ${condition} )\n`;
+				text += `\t\t\t\tnextState = ${target};\n`;
+			}
 		}
 		text += "\t\tend\n\n";
 		return text;
@@ -42,22 +46,23 @@ class VerilogConverter {
 	// Return a string representing the bit range, for example "[3:0]"
 	_getBitRange() {
 		const upper_bit = this._getStateWidth() - 1;
-		if (upper_bit == 0)
+		if (upper_bit === 0)
 			return "";
 		else
-			return "[" + upper_bit + ":0]";
+			return `[${upper_bit}:0]`;
 	}
 	_getEnumText() {
-		let enum_text = "typedef enum bit " + this._getBitRange() + " {\n";
+		let enum_text = `typedef enum bit ${this._getBitRange()} {\n`;
 		const state_list = this.graph.GetStates();
-		let state_index;
-		for (state_index in state_list) {
-			const state = state_list[state_index];
-			enum_text += "\t" + this.graph.GetCellText(state) + ",\n";
+		for (let state_index in state_list) {
+			if (state_list.hasOwnProperty(state_index)) {
+				const state = state_list[state_index];
+				enum_text += `\t${this.graph.GetCellText(state)},\n`;
+			}
 		}
 		enum_text = enum_text.substring(0, enum_text.length - 2) + "\n} StateType;\n\n";
-		enum_text += 'StateType state;\n';
-		enum_text += 'StateType nextState;\n\n';
+		enum_text += "StateType state;\n";
+		enum_text += "StateType nextState;\n\n";
 		return enum_text;
 	}
 
@@ -66,14 +71,12 @@ class VerilogConverter {
 		text += "\tnextState = state;\n";
 		text += "\tcase(state)\n";
 
-		//for (stateName in this.stateDict){
-		//  text += this.stateDict[stateName].transitionText;
-		//}
 		const state_list = this.graph.GetStates();
-		let state_index;
-		for (state_index in state_list) {
-			const state = state_list[state_index];
-			text += this._getStateTransitionText(state);
+		for (let state_index in state_list) {
+			if (state_list.hasOwnProperty(state_index)) {
+				const state = state_list[state_index];
+				text += this._getStateTransitionText(state);
+			}
 		}
 
 		text += "\tendcase\n";
@@ -84,9 +87,9 @@ class VerilogConverter {
 	_getFFText(edge, reset, initial_state) {
 		// Determine the edge of the clock
 		let clock_edge;
-		if (edge == "Positive")
+		if (edge === "Positive")
 			clock_edge = "posedge";
-		else if (edge == "Negative")
+		else if (edge === "Negative")
 			clock_edge = "negedge";
 		else
 			clock_edge = "";
@@ -94,7 +97,7 @@ class VerilogConverter {
 		// Determine the edge of the reset
 		let reset_edge;
 		let reset_condition;
-		if (reset == "Active High") {
+		if (reset === "Active High") {
 			reset_edge = "posedge";
 			reset_condition = "rst == 1";
 		}
@@ -106,7 +109,7 @@ class VerilogConverter {
 		let text = "always_ff @(" + clock_edge + " clk, " + reset_edge + " rst) begin\n";
 		text += "\tif (" + reset_condition + ")\n";
 		text += "\t\tstate <= " + initial_state + ";\n";
-		text += "\telse\n"
+		text += "\telse\n";
 		text += "\t\tstate <= nextState\n";
 		text += "end\n\n";
 		return text;

@@ -1,3 +1,6 @@
+// ReSharper disable UnknownCssClass
+// ReSharper disable Html.TagShouldBeSelfClosed
+
 // BSD License
 import React from "react";
 import ReactDom from "react-dom";
@@ -17,6 +20,7 @@ import Glyphicon from "react-bootstrap/lib/Glyphicon";
 import SettingsMenu from "./SettingsMenu"
 import {ReactElementResize} from "react-element-resize";
 import FileDownload from "./file-download";
+import Update from "immutability-helper";
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
 
@@ -249,9 +253,9 @@ class BodyPane extends React.Component {
 	}
 
 	_handleKeyPress(event) {
-		if ((event.keyCode || event.which) == 32)
+		if ((event.keyCode || event.which) === 32)
 			event.preventDefault();
-		if (event.key.length == 1) {
+		if (event.key.length === 1) {
 			this._editActiveCellString(event.key);
 			document.getElementById("title-edit").value = this.graph.GetCellText(this.state.active_cell);
 		}
@@ -268,7 +272,7 @@ class BodyPane extends React.Component {
 		}
 	}
 
-	_handleMouseUp(event) {
+	_handleMouseUp() {
 		this._updateVerilog();
 		this.setState({dragging: false});
 	}
@@ -290,7 +294,7 @@ class BodyPane extends React.Component {
 		this.setState({editting_textarea: true});
 	}
 
-	_handleToggleMenu(event) {
+	_handleToggleMenu() {
 		this.setState({ show_settings: !this.state.show_settings });
 
 	}
@@ -348,21 +352,32 @@ class BodyPane extends React.Component {
 			const fr = new FileReader();
 			fr.onload = function() {
 				// Continue loading here
-				const new_data = CircularJSON.parse(decodeURIComponent(fr.result.substring(30)));
+				const new_data = JSON.parse(decodeURIComponent(fr.result.substring(30)));
 				const new_state = this.graph.LoadData(new_data);
-				//this.setState(new_state);
+				this.setState(new_state);
+				this._updateVerilog();
 			}.bind(this);
 			fr.readAsText(files[0]);
 		}
-
-			// Not supported
+		// Not supported
 		else {
 			window.alert("Your browser does not support file loads.");
 		}
 	}
 
-	_handleSaveGraph(event) {
-		FileDownload(`data:text/plain;charset=utf-8,${encodeURIComponent(this.graph.GetData(this.state))}`, "StateMachine.json");
+	_handleSaveGraph() {
+		this._clearActiveCell();
+		const saved_state = Update(this.state, {
+			active_cell: {$set: null},
+			dragging: {$set: false},
+			scale: {$set: 1},
+			show_settings: {$set: false},
+			editting_textarea: {$set: false},
+			debounce_timer: {$set: 0},
+			verilog_text: {$set: ""}
+		});
+		delete saved_state["scale"];
+		FileDownload(`data:text/plain;charset=utf-8,${encodeURIComponent(this.graph.GetData(saved_state))}`, "StateMachine.json");
 	}
 
 	_getStateNames() {

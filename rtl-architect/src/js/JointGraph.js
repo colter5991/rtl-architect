@@ -131,7 +131,7 @@ class JointGraph extends IGraph {
 		let text = this.GetCellText(active_cell);
 		if (character)
 			text += character;
-		else if (text != "")
+		else if (text !== "")
 			text = text.substring(0, text.length - 1);
 		this._setCellText(active_cell, text);
 	}
@@ -146,8 +146,10 @@ class JointGraph extends IGraph {
 
 	// Create a new State View
 	NewState(xpos, ypos, name, output_color, output=false, default_output=false) {
+		let state;
 		if (default_output) {
-			var state = new Joint.shapes.DefaultOutput({
+			// ReSharper disable once InconsistentNaming
+			state = new Joint.shapes.DefaultOutput({
 				position: { x: xpos, y: ypos },
 				size: { width: 130, height: 55 },
 				attrs: {
@@ -157,14 +159,14 @@ class JointGraph extends IGraph {
 			});
 			state.attr("rect/stroke", output_color);
 		} else if (output) {
-			var state = new Joint.shapes.Output({
+			state = new Joint.shapes.Output({
 				position: { x: xpos, y: ypos },
 				size: { width: 100, height: 40 },
 				attrs: { text: { text: name } }
 			});
 			state.attr("rect/stroke", output_color);
 		} else {
-			var state = new Joint.shapes.fsa.State({
+			state = new Joint.shapes.fsa.State({
 				position: { x: xpos, y: ypos },
 				size: { width: 120, height: 40 },
 				attrs: { text: { text: name } }
@@ -237,16 +239,25 @@ class JointGraph extends IGraph {
 	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target, output_color, output=false) {
 		let  cell;
 		if (output) {
+			// ReSharper disable once InconsistentNaming
 			cell = new Joint.shapes.OutputTransition({
-				source: source,
-				target: target,
+				source: {
+					id: source.id
+				},
+				target: {
+					id: target.id
+				},
 				labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
 			});
 			cell.attr({ '.connection': { stroke: "green" } });
 		} else {
 			cell = new Joint.shapes.fsa.Arrow({
-				source: source,
-				target: target,
+				source: {
+					id: source.id
+				},
+				target: {
+					id: target.id
+				},
 				labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
 			});
 		}
@@ -377,19 +388,11 @@ class JointGraph extends IGraph {
 	}
 
 	GetData(application_data) {
-		return CircularJSON.stringify({graph_data: this.graph.toJSON(), application_data: application_data });
+		return JSON.stringify({graph_data: this.graph.toJSON(), application_data: application_data });
 	}
 
 	LoadData(data) {
-		debugger;
-		this.graph.clear();
-		//this.paper.remove();
-
-		//this.graph = new Joint.dia.Graph();
-		//this.graph.on("change", this.update_handler);
-		//this.paper = this._instantiatePaper(this.graph);
 		this.graph.fromJSON(data.graph_data);
-
 		return data.application_data;
 	}
 }

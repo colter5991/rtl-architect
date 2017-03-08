@@ -6,7 +6,7 @@ Joint.shapes.Output = Joint.shapes.basic.Rect.extend({
 		type: "Output",
 		attrs: {
 		}
-	}, Joint.shapes.basic.Rect.prototype.defaults),
+	}, Joint.shapes.basic.Rect.prototype.defaults)
 });
 
 export default Joint.shapes.Output;

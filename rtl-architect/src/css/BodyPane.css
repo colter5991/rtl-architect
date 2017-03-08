@@ -33,6 +33,7 @@
 	margin-right: -500px;
     overflow: hidden;
 	position: relative;
+	background-color: #000000;
 	background-color: rgba(0, 0, 0, 0);
 }
 
@@ -60,6 +61,10 @@
 	-o-resize: none;
 	resize: none;
 	overflow: hidden;
+	-moz-min-width: 50px;
+	-ms-min-width: 50px;
+	-o-min-width: 50px;
+	-webkit-min-width: 50px;
 	min-width: 50px;
 }
 

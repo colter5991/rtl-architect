@@ -8,10 +8,9 @@ window.MODULE_LOADED = true;
 // MIT License
 import "bootstrap/dist/css/bootstrap.css";
 import Jumbotron from "react-bootstrap/lib/Jumbotron";
-//import jQuery from "jquery";
-//window.$ = window.jQuery = jQuery;
 
 // BSD License
+// ReSharper disable once UnusedLocals
 import React from "react";
 import ReactDom from "react-dom";
 
@@ -19,6 +18,7 @@ import ReactDom from "react-dom";
 import BodyPane from "./BodyPane";
 import "main.css";
 
+// ReSharper disable once InconsistentNaming
 const Title = () => {
 	return (
 		<div className="title-text" id="title-text">
