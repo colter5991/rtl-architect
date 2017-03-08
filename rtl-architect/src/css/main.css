@@ -1,6 +1,6 @@
 ﻿.title-text .jumbotron {
 	text-align: center;
-	padding: 15px;
+	padding: 11.5px;
 	margin: 0;
 	border-bottom: 1px solid lightgray;
 }
@@ -8,6 +8,13 @@
 .title-text h1 {
 	padding: 0;
 	margin: 0;
+	font-size: 3.5em;
+}
+
+.title-text h3 {
+	padding: 0;
+	margin: 0;
+	font-size: 1.5em;
 }
 
 .root {

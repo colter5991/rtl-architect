@@ -19,7 +19,10 @@ import "main.css";
 const Title = () => {
 	return (
 		<div className="title-text" id="title-text">
-			<Jumbotron><h1>RTL Architect</h1></Jumbotron>
+			<Jumbotron>
+				<h1>RTL Architect</h1>
+				<h3>Because building hardware shouldn&#8217;t be so hard</h3>
+			</Jumbotron>
 		</div>
     );
 };
