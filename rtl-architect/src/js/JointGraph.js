@@ -1,6 +1,8 @@
-﻿// MIT License
-//import jQuery from "jquery";
-//window.$ = window.jQuery = jQuery;
+﻿// ReSharper disable InconsistentNaming
+
+// MIT License
+import jQuery from "jquery";
+window.$ = window.jQuery = jQuery;
 
 // MPL 2.0 License
 import Joint from "jointjs";
@@ -148,7 +150,6 @@ class JointGraph extends IGraph {
 	NewState(xpos, ypos, name, output_color, output=false, default_output=false) {
 		let state;
 		if (default_output) {
-			// ReSharper disable once InconsistentNaming
 			state = new Joint.shapes.DefaultOutput({
 				position: { x: xpos, y: ypos },
 				size: { width: 130, height: 55 },
@@ -239,7 +240,6 @@ class JointGraph extends IGraph {
 	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target, output_color, output=false) {
 		let  cell;
 		if (output) {
-			// ReSharper disable once InconsistentNaming
 			cell = new Joint.shapes.OutputTransition({
 				source: {
 					id: source.id

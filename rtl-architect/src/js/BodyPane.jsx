@@ -21,8 +21,6 @@ import SettingsMenu from "./SettingsMenu"
 import {ReactElementResize} from "react-element-resize";
 import FileDownload from "./file-download";
 import Update from "immutability-helper";
-//import jQuery from "jquery";
-//window.$ = window.jQuery = jQuery;
 
 // My Loads
 import "BodyPane.css";
@@ -170,7 +168,7 @@ class BodyPane extends React.Component {
 			return;
 		}
 
-		$("#paper").focus();
+		document.getElementById("paper").focus();
 		this._clearActiveCell();
 		const cell = this.graph.HandleCellClick(cell_view, this.ACTIVE_COLOR);
 		this.setState({active_cell: cell, editting_textarea: false, debounce_timer: dt.getTime()});
@@ -178,7 +176,7 @@ class BodyPane extends React.Component {
 
 	// Handle clicking on nothing
 	_handleNothingClick(event) {
-		$("#paper").focus();
+		document.getElementById("paper").focus();
 		this._clearActiveCell();
 		this._handleDragStart(event.originalEvent);
 		document.getElementById("title-edit").value = "";
