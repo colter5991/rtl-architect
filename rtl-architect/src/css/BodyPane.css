@@ -1,5 +1,9 @@
-﻿.window h2 {
+﻿.verilog-code h2 {
 	margin-left: 20px;
+}
+
+.next-state-title h2 {
+	margin-left: 10px;
 }
 
 #verilog pre {

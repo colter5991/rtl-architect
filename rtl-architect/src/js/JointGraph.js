@@ -18,51 +18,17 @@ class JointGraph extends IGraph {
 	// Takes in a jointjs graph object
 	constructor(paper_width, paper_height, cell_click_handler, nothing_click_handler, update_handler) {
 		super();
+
+		this.paper_width = paper_width;
+		this.paper_height = paper_height;
+		this.cell_click_handler = cell_click_handler;
+		this.nothing_click_handler = nothing_click_handler;
+		this.update_handler = update_handler;
+
 		this.graph = new Joint.dia.Graph();
-		this.paper = new Joint.dia.Paper({
-			el: $('#paper'),
-			width: paper_width,
-			height: paper_height,
-			gridSize: 1,
-			model: this.graph,
-			validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
-				if (linkView.model.attributes.type === "fsa.OutputTransition") {
-					// Link is an output
-					if (cellViewS && (cellViewS.model.attributes.type === "fsa.Output"
-						|| cellViewS.model.attributes.type === "fsa.Arrow"
-						|| cellViewS.model.attributes.type === "fsa.OutputTransition"
-						|| cellViewS.model.attributes.type === "fsa.DefaultOutput")) {
-						return false;
-					} else if (cellViewT && (cellViewT.model.attributes.type === "fsa.State"
-						|| cellViewT.model.attributes.type === "fsa.Arrow"
-						|| cellViewT.model.attributes.type === "fsa.OutputTransition"
-						|| cellViewT.model.attributes.type === "fsa.DefaultOutput")) {
-						return false;
-					}
-				} else {
-					// Link is a state transition
-					if (cellViewS && (cellViewS.model.attributes.type === "fsa.Output"
-						|| cellViewS.model.attributes.type === "fsa.Arrow"
-						|| cellViewS.model.attributes.type === "fsa.OutputTransition"
-						|| cellViewS.model.attributes.type === "fsa.DefaultOutput")) {
-						return false;
-					} else if (cellViewT && (cellViewT.model.attributes.type === "fsa.Output"
-						|| cellViewT.model.attributes.type === "fsa.Arrow"
-						|| cellViewT.model.attributes.type === "fsa.OutputTransition"
-						|| cellViewT.model.attributes.type === "fsa.DefaultOutput")) {
-						return false;
-					}
-				}
+		this.graph.on("change", this.update_handler);
 
-				return true;
-			}
-		});
-
-		this.paper.on('cell:pointerdown', cell_click_handler);
-		this.paper.on('blank:pointerdown', nothing_click_handler);
-		this.graph.on('change', function() {
-			update_handler();
-		});
+		this.paper = this._instantiatePaper(this.graph);
 	}
 
 	/*****************************************************************************
@@ -72,9 +38,9 @@ class JointGraph extends IGraph {
 	GetCellText(state) {
 		if (!state)
 			return null;
-		if (state.attributes.type === "fsa.State" || state.attributes.type === "fsa.Output")
+		if (state.attributes.type === "fsa.State" || state.attributes.type === "Output")
 			return state.attr("text/text");
-		else if (state.attributes.type === "fsa.DefaultOutput")
+		else if (state.attributes.type === "DefaultOutput")
 			return state.attr("text.text2/text").substring(1);
 		else
 			return state.label(0).attrs.text.text;
@@ -91,7 +57,7 @@ class JointGraph extends IGraph {
 		const t_list = this.graph.getConnectedLinks(element, opt);
 
 		// Trim out links that aren't transitions
-		return t_list.filter(function (x) { return x.attributes.type === "fsa.OutputTransition" });
+		return t_list.filter(function (x) { return x.attributes.type === "OutputTransition" });
 	}
 
 	GetStates() {
@@ -99,7 +65,7 @@ class JointGraph extends IGraph {
 	}
 
 	GetDefaultOutputs() {
-		return this.graph.getElements().filter(function(x) { return x.attributes.type === "fsa.DefaultOutput" });
+		return this.graph.getElements().filter(function(x) { return x.attributes.type === "DefaultOutput" });
 	}
 
 	GetCell(state_id) {
@@ -110,6 +76,52 @@ class JointGraph extends IGraph {
 	/*****************************************************************************
 	* Utility Functions
 	*****************************************************************************/
+
+	_instantiatePaper(graph) {
+		const paper = new Joint.dia.Paper({
+			el: $("#paper"),
+			width: this.paper_width,
+			height: this.paper_height,
+			gridSize: 1,
+			model: graph,
+			validateConnection: function(cell_view_s, magnet_s, cell_view_t, magnet_t, end, link_view) {
+				if (link_view.model.attributes.type === "OutputTransition") {
+					// Link is an output
+					if (cell_view_s && (cell_view_s.model.attributes.type === "Output"
+						|| cell_view_s.model.attributes.type === "fsa.Arrow"
+						|| cell_view_s.model.attributes.type === "OutputTransition"
+						|| cell_view_s.model.attributes.type === "DefaultOutput")) {
+						return false;
+					} else if (cell_view_t && (cell_view_t.model.attributes.type === "fsa.State"
+						|| cell_view_t.model.attributes.type === "fsa.Arrow"
+						|| cell_view_t.model.attributes.type === "OutputTransition"
+						|| cell_view_t.model.attributes.type === "DefaultOutput")) {
+						return false;
+					}
+				} else {
+					// Link is a state transition
+					if (cell_view_s && (cell_view_s.model.attributes.type === "Output"
+						|| cell_view_s.model.attributes.type === "fsa.Arrow"
+						|| cell_view_s.model.attributes.type === "OutputTransition"
+						|| cell_view_s.model.attributes.type === "DefaultOutput")) {
+						return false;
+					} else if (cell_view_t && (cell_view_t.model.attributes.type === "Output"
+						|| cell_view_t.model.attributes.type === "fsa.Arrow"
+						|| cell_view_t.model.attributes.type === "OutputTransition"
+						|| cell_view_t.model.attributes.type === "DefaultOutput")) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+		});
+
+		paper.on("cell:pointerdown", this.cell_click_handler);
+		paper.on("blank:pointerdown", this.nothing_click_handler);
+
+		return paper;
+	}
 
 	// Append the given character to the end of the active cell string
 	EditActiveCellString(character, active_cell) {
@@ -135,7 +147,7 @@ class JointGraph extends IGraph {
 	// Create a new State View
 	NewState(xpos, ypos, name, output_color, output=false, default_output=false) {
 		if (default_output) {
-			var state = new Joint.shapes.DefaultOutput.Element({
+			var state = new Joint.shapes.DefaultOutput({
 				position: { x: xpos, y: ypos },
 				size: { width: 130, height: 55 },
 				attrs: {
@@ -145,7 +157,7 @@ class JointGraph extends IGraph {
 			});
 			state.attr("rect/stroke", output_color);
 		} else if (output) {
-			var state = new Joint.shapes.output.Element({
+			var state = new Joint.shapes.Output({
 				position: { x: xpos, y: ypos },
 				size: { width: 100, height: 40 },
 				attrs: { text: { text: name } }
@@ -173,11 +185,11 @@ class JointGraph extends IGraph {
 	SetCellStroke(state, stroke, output_color, default_color) {
 		if (state.attributes.type === "fsa.State") {
 			state.attr("circle/stroke", stroke);
-		} else if (state.attributes.type === "fsa.DefaultOutput") {
+		} else if (state.attributes.type === "DefaultOutput") {
 			state.attr("rect/stroke", default_color);
-		} else if (state.attributes.type === "fsa.Output") {
+		} else if (state.attributes.type === "Output") {
 			state.attr("rect/stroke", output_color);
-		} else if (state.attributes.type === "fsa.OutputTransition") {
+		} else if (state.attributes.type === "OutputTransition") {
 			state.attr({ '.connection': { stroke: output_color } });
 		} else {
 			state.attr({ '.connection': { stroke: stroke } });
@@ -186,7 +198,7 @@ class JointGraph extends IGraph {
 
 	// Set the text of the given cell to the given text
 	_setCellText(state, text) {
-		if (state.attributes.type === "fsa.State" || state.attributes.type === "fsa.Output") {
+		if (state.attributes.type === "fsa.State" || state.attributes.type === "Output") {
 			// calculate the new width
 			let new_width = 100;
 			if ((Utils.GetLongestLine(text) * 10) + 25 > new_width) {
@@ -201,7 +213,7 @@ class JointGraph extends IGraph {
 
 			state.resize(new_width, new_height);
 			state.attr("text/text", text);
-		} else if (state.attributes.type === "fsa.DefaultOutput") {
+		} else if (state.attributes.type === "DefaultOutput") {
 			// calculate the new width
 			let new_width = 130;
 			if ((Utils.GetLongestLine(text) * 10) + 25 > new_width) {
@@ -225,7 +237,7 @@ class JointGraph extends IGraph {
 	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target, output_color, output=false) {
 		let  cell;
 		if (output) {
-			cell = new Joint.shapes.outputTransition.Element({
+			cell = new Joint.shapes.OutputTransition({
 				source: source,
 				target: target,
 				labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
@@ -290,7 +302,7 @@ class JointGraph extends IGraph {
 
 	ShowHideOutputLogic(show) {
 		const links = this.graph.getLinks();
-		const t_list = links.filter(function (x) { return x.attributes.type === "fsa.OutputTransition" });
+		const t_list = links.filter(function (x) { return x.attributes.type === "OutputTransition" });
 
 		for (let link in t_list) {
 			if (t_list.hasOwnProperty(link)) {
@@ -303,7 +315,7 @@ class JointGraph extends IGraph {
 		}
 
 		const outputs = this.graph.getElements();
-		const s_list = outputs.filter(function (x) { return x.attributes.type === "fsa.Output" });
+		const s_list = outputs.filter(function (x) { return x.attributes.type === "Output" });
 
 		for (let output in s_list) {
 			if (s_list.hasOwnProperty(output)) {
@@ -332,7 +344,7 @@ class JointGraph extends IGraph {
 		const origin = this.paper.options.origin;
 
 		let cell_position;
-		if (active_cell.attributes.type === "fsa.OutputTransition" || active_cell.attributes.type === "fsa.Arrow") {
+		if (active_cell.attributes.type === "OutputTransition" || active_cell.attributes.type === "fsa.Arrow") {
 			cell_position = {
 				x: $(active_cell.findView(this.paper)._V.labels.node).offset().left + ($(active_cell.findView(this.paper)._V.labels.node).width() * 0.5),
 				y: $(active_cell.findView(this.paper)._V.labels.node).offset().top + ($(active_cell.findView(this.paper)._V.labels.node).height() * 0.5)
@@ -355,13 +367,30 @@ class JointGraph extends IGraph {
 	}
 
 	LegalizeText(cell, text) {
-		if (cell.attributes.type === "fsa.Output" || cell.attributes.type === "fsa.DefaultOutput")
+		if (cell.attributes.type === "Output" || cell.attributes.type === "DefaultOutput")
 			return text;
 		else if (Utils.CountLines(text) > 1) {
 			return Utils.SplitLinesRejoin(text, "");
 		} else {
 			return text;
 		}
+	}
+
+	GetData(application_data) {
+		return CircularJSON.stringify({graph_data: this.graph.toJSON(), application_data: application_data });
+	}
+
+	LoadData(data) {
+		debugger;
+		this.graph.clear();
+		//this.paper.remove();
+
+		//this.graph = new Joint.dia.Graph();
+		//this.graph.on("change", this.update_handler);
+		//this.paper = this._instantiatePaper(this.graph);
+		this.graph.fromJSON(data.graph_data);
+
+		return data.application_data;
 	}
 }
 

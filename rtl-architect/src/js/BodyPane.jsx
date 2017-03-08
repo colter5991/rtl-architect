@@ -16,6 +16,7 @@ import Overlay from "react-bootstrap/lib/Overlay";
 import Glyphicon from "react-bootstrap/lib/Glyphicon";
 import SettingsMenu from "./SettingsMenu"
 import {ReactElementResize} from "react-element-resize";
+import FileDownload from "./file-download";
 //import jQuery from "jquery";
 //window.$ = window.jQuery = jQuery;
 
@@ -59,11 +60,15 @@ class BodyPane extends React.Component {
 		this._handleTransitionChangeSource = this._handleTransitionChangeSource.bind(this);
 		this._handleChangeNextStateLogic = this._handleChangeNextStateLogic.bind(this);
 		this._handleChangeOutputLogic = this._handleChangeOutputLogic.bind(this);
+		this._handleUnload = this._handleUnload.bind(this);
+		this._handleFileLoad = this._handleFileLoad.bind(this);
+		this._handleSaveGraph = this._handleSaveGraph.bind(this);
 		
 		window.onresize = this._handleResizeWindow;
 
 		this.graph = null;
 		this.verilog_converter = null;
+
 		this.state = {
 			edge: "Positive", // Whether the clock edge is positive, negative, or both
 			reset: "Active High", // Whether the reset signal is active high or active low
@@ -90,10 +95,20 @@ class BodyPane extends React.Component {
 		// This object relies on the previous being loaded
 		this.verilog_converter = new VerilogConverter(this.graph);
 		this._initGraph();
+
+		window.addEventListener("beforeunload", this._handleUnload);
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener("beforeunload", this._handleUnload);
 	}
 
 	_updateVerilog() {
 		this.setState({ verilog_text: this.verilog_converter.Update(this.state.edge, this.state.reset, this.state.initial_state) });
+	}
+
+	_handleUnload(event) {
+		event.returnValue = "Are you sure you want to leave?";
 	}
 
 	_newState(xpos, ypos, name) {
@@ -187,7 +202,6 @@ class BodyPane extends React.Component {
 
 	// Handle changes in the source of the transition
 	_handleResizeWindow() {
-		//debugger 
 		this.graph.HandleResizeWindow(Math.max(document.getElementById("paper").offsetWidth - 500, -500),
 			Math.max(document.documentElement.clientHeight - 199, 0));
 	}
@@ -324,6 +338,33 @@ class BodyPane extends React.Component {
 		this.setState({ output_logic: event.target.checked });
 	}
 
+	// CREDIT: Andy E - http://stackoverflow.com/questions/3814231/loading-an-image-to-a-img-from-input-file
+	_handleFileLoad(event) {
+		const target = event.target;
+		const files = target.files;
+
+		// FileReader support
+		if (FileReader && files && files.length) {
+			const fr = new FileReader();
+			fr.onload = function() {
+				// Continue loading here
+				const new_data = CircularJSON.parse(decodeURIComponent(fr.result.substring(30)));
+				const new_state = this.graph.LoadData(new_data);
+				//this.setState(new_state);
+			}.bind(this);
+			fr.readAsText(files[0]);
+		}
+
+			// Not supported
+		else {
+			window.alert("Your browser does not support file loads.");
+		}
+	}
+
+	_handleSaveGraph(event) {
+		FileDownload(`data:text/plain;charset=utf-8,${encodeURIComponent(this.graph.GetData(this.state))}`, "StateMachine.json");
+	}
+
 	_getStateNames() {
 		if (this.graph === null)
 			return [];
@@ -338,10 +379,10 @@ class BodyPane extends React.Component {
 					primary="second">
 				<div className="window" id="next-state">
 					<Row className="next-state-menu">
-						<Col sm={5}>
+						<Col md={5} className="next-state-title">
 							<h2>Next State Logic</h2> 
 						</Col>
-						<Col sm={3}>
+						<Col md={4} className="next-state-buttons">
 							<ButtonToolbar className="graph-toolbar">
 								<DropdownButton title={<Glyphicon glyph="plus" />} noCaret id="add-button">
 									<MenuItem onClick={() => this._newState(30, 30, "NEW_STATE")} eventKey="1">New State</MenuItem>
@@ -353,9 +394,16 @@ class BodyPane extends React.Component {
 								<Button disabled={this.state.active_cell === null} onClick={() => this._deleteState(this.state.active_cell)}>
 									<Glyphicon glyph="remove" style={this.state.active_cell !== null ? {color: "crimson"} : {}} />
 								</Button>
+								<Button id="save-graph" onClick={this._handleSaveGraph}>
+									<Glyphicon glyph="floppy-save" />
+								</Button>
+								<Button onClick={() => document.getElementById("file-open").click()}>
+									<Glyphicon glyph="folder-open" />
+									<input id="file-open" onChange={this._handleFileLoad} type="file" accept=".json" style={{ display: "none" }} />
+								</Button>
 							</ButtonToolbar>
 						</Col>
-						<Col sm={4} className="logic-checkboxes">
+						<Col md={3} className="logic-checkboxes">
 							<Row><Checkbox inline checked={this.state.next_state_logic} onChange={this._handleChangeNextStateLogic}>Show Next State Logic</Checkbox></Row>
 							<Row><Checkbox inline checked={this.state.output_logic} onChange={this._handleChangeOutputLogic}>Show Output Logic</Checkbox></Row>
 						</Col>
@@ -380,7 +428,7 @@ class BodyPane extends React.Component {
 						</div>
 					</pre>
 				</div>
-				<div className="window">
+				<div className="window verilog-code">
 					<h2>Verilog Code 
 					<ButtonToolbar className="options-toolbar">
 						<Button ref="target" onClick={this._handleToggleMenu} id="dropdown-settings">
