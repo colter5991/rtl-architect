@@ -28,10 +28,10 @@ const config = {
 			{ test: /\.css$/, loader: 'style-loader!css-loader' },
 			{ test: /\.png$/, loader: "url-loader?limit=100000" },
 			{ test: /\.jpg$/, loader: "file-loader" },
-			{ test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-			{ test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
-			{ test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
-			{ test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' }
+			{ test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff&name=./dist/[hash].[ext]' },
+			{ test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream&name=./dist/[hash].[ext]' },
+			{ test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader?name=./dist/[hash].[ext]' },
+			{ test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml&name=./dist/[hash].[ext]' }
 		]
 	},
 	resolve: {
@@ -46,7 +46,7 @@ const config = {
 
 if (process.env.NODE_ENV === 'production') {
 	// Production mode
-	//config.output.publicPath = '/';
+	config.output.publicPath = '/rtl-architect/';
 	//config.module.loaders.push({ test: /\.jsx?$/, loader: "babel-loader", query: { presets: ['es2015', 'react'] } });
 } else {
 	// Dev Mode
