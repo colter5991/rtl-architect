@@ -14,6 +14,7 @@ class VerilogConverter {
 		// Trim out transitions with no target
 		t_list = t_list.filter(function (x) { return x.getTargetElement() != null; });
 
+		let first = true;
 		// Generate text
 		for (let t_index in t_list) {
 			if (t_list.hasOwnProperty(t_index)) {
@@ -22,8 +23,10 @@ class VerilogConverter {
 				const target = this.graph.GetCellText(t.getTargetElement());
 				text += "\t\t\t";
 				// ReSharper disable once ConditionIsAlwaysConst
-				if (t_index !== 0) {
+				if (!first) {
 					text += "else ";
+				} else {
+					first = false;
 				}
 				text += `if ( ${condition} )\n`;
 				text += `\t\t\t\tnextState = ${target};\n`;
