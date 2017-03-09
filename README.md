@@ -26,10 +26,10 @@ RTL Architect simplifies this process into the following steps:
 1. Make a state transition diagram (code automatically generated)
 2. Update the diagram as the design is modified (code automatically updated)
 
-## Can I contribute?
+# Can I contribute?
 
 Yes! Please do! We welcome community support with both pull requests, feature requests, and bug reports. Please don't hesitate to jump in.
 
-## License
+# License
 
 MIT
