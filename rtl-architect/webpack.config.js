@@ -1,8 +1,9 @@
 ﻿/// <binding />
 "use strict";
 
-var webpack = require('webpack');
-var path = require('path');
+// ReSharper disable UndeclaredGlobalVariableUsing
+var webpack = require("webpack");
+var path = require("path");
 
 // definePlugin takes raw strings and inserts them, so you can put strings of JS if you want.
 var definePlugin = new webpack.DefinePlugin({
@@ -36,7 +37,7 @@ const config = {
 	resolve: {
 		// you can now require('file') instead of require('file.coffee')
 		extensions: ['.js', '.json', '.jsx'],
-		modules: ["node_modules", path.resolve('./src/js'), path.resolve('./src/lib'), path.resolve('./src/css')],
+		modules: ["node_modules", path.resolve('./src/js'), path.resolve('./src/css')],
 		alias: {
 			"underscore": "lodash"
 		}
@@ -45,7 +46,7 @@ const config = {
 
 if (process.env.NODE_ENV === 'production') {
 	// Production mode
-	config.output.publicPath = '/';
+	//config.output.publicPath = '/';
 	//config.module.loaders.push({ test: /\.jsx?$/, loader: "babel-loader", query: { presets: ['es2015', 'react'] } });
 } else {
 	// Dev Mode
