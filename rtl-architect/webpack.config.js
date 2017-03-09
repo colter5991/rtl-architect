@@ -46,7 +46,7 @@ const config = {
 
 if (process.env.NODE_ENV === 'production') {
 	// Production mode
-	config.output.publicPath = '/rtl-architect/';
+	config.output.publicPath = '/rtl-architect/rtl-architect/';
 	//config.module.loaders.push({ test: /\.jsx?$/, loader: "babel-loader", query: { presets: ['es2015', 'react'] } });
 } else {
 	// Dev Mode
