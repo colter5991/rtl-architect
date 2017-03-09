@@ -21,7 +21,7 @@ const Title = () => {
 		<div className="title-text" id="title-text">
 			<Jumbotron>
 				<h1>RTL Architect</h1>
-				<h3>Because building hardware shouldn&#8217;t be so hard</h3>
+				<h3><i>Because building hardware shouldn&#8217;t be so hard</i></h3>
 			</Jumbotron>
 		</div>
     );
