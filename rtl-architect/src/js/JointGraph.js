@@ -239,25 +239,28 @@ class JointGraph extends IGraph {
 	// Make a new link
 	NewTransition(source, target, name, handle_cell_change_source, handle_cell_change_target, output_color, output=false) {
 		let  cell;
+		if (source.hasOwnProperty("id")) {
+			source = {
+				id: source.id
+			};
+		}
+		if (target.hasOwnProperty("id")) {
+			target = {
+				id: target.id
+			};
+		}
+
 		if (output) {
 			cell = new Joint.shapes.OutputTransition({
-				source: {
-					id: source.id
-				},
-				target: {
-					id: target.id
-				},
+				source: source,
+				target: target,
 				labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
 			});
 			cell.attr({ '.connection': { stroke: "green" } });
 		} else {
 			cell = new Joint.shapes.fsa.Arrow({
-				source: {
-					id: source.id
-				},
-				target: {
-					id: target.id
-				},
+				source: source,
+				target: target,
 				labels: [{ position: 0.5, attrs: { text: { text: name || '' } } }]
 			});
 		}
