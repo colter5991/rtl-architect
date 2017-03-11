@@ -3,6 +3,7 @@
 setup_git() {
   git config --global user.email "jordhuff@gmail.com"
   git config --global user.name "Justice Warrior"
+  git config --global credential.https://${GH_TOKEN}@github.com/colter5991/rtl-architect.git
 }
 
 commit_website_files() {
