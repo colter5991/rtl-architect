@@ -3,10 +3,11 @@ node_js:
   - "node"
 before_script:
   - npm install -g webpack
+  - cd rtl-architect
 script:
-  - cd rtl-architect && npm install && webpack -p
+  - npm install && webpack -p
+after_success:
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - cd ..
-after_success:
   - ./push.sh
