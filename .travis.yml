@@ -1,4 +1,6 @@
 language: node_js
 node_js:
   - "node"
-script: cd rtl-architect && npm build
+before_script:
+  - npm install -g webpack
+script: cd rtl-architect && webpack -p
