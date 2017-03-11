@@ -2,6 +2,8 @@
 Automatic verilog code generation
 [access online here](https://colter5991.github.io/rtl-architect/)
 
+[![Build Status](https://travis-ci.org/colter5991/rtl-architect.svg?branch=master)](https://travis-ci.org/colter5991/rtl-architect)
+
 # Why?
 
 Because tools should enable us, not get in the way.
