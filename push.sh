@@ -14,6 +14,8 @@ commit_website_files() {
 upload_files() {
   git remote add origin-pages https://${GH_TOKEN}@github.com/colter5991/rtl-architect.git > /dev/null 2>&1
   git push --quiet --set-upstream origin-pages gh-pages
+  git checkout $BRANCH
+  git merge gh-pages
 }
 
 setup_git
