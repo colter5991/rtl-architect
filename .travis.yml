@@ -5,4 +5,4 @@ before_script:
   - npm install -g webpack
 script: cd rtl-architect && npm install && webpack -p
 after_success:
-  - .travis/push.sh
+  - ../.travis/push.sh
