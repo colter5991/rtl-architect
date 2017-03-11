@@ -3,4 +3,4 @@ node_js:
   - "node"
 before_script:
   - npm install -g webpack
-script: cd rtl-architect && webpack -p
+script: cd rtl-architect && npm install && webpack -p
