@@ -345,3 +345,4 @@ rtl-architect/web.config
 rtl-architect/packages.config
 rtl-architect/rtl-architect.csproj
 rtl-architect.sln
+rtl-architect/dist/*
