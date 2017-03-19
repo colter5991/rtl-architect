@@ -7,7 +7,7 @@ before_script:
   - rm -rf dist
 script:
   - npm install
-  - NODE_ENV=production
+  - export NODE_ENV=production
   - webpack -p
 after_success:
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
