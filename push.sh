@@ -8,6 +8,7 @@ setup_git() {
 commit_website_files() {
   git add -f rtl-architect/dist
   git commit --message "Travis build: $TRAVIS_BUILD_NUMBER"
+  git status
 }
 
 upload_files() {
