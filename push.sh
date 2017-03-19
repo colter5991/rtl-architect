@@ -13,7 +13,7 @@ commit_website_files() {
 }
 
 upload_files() {
-  git push https://${GH_TOKEN}@github.com/colter5991/rtl-architect.git --force-with-lease
+  git push https://${GH_TOKEN}@github.com/colter5991/rtl-architect.git --force
 }
 
 setup_git
