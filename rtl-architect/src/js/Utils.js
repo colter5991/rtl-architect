@@ -24,6 +24,23 @@
 	static SplitLinesRejoin(str, rejoin_pattern) {
 		return str.split(/\r|\n/).join(rejoin_pattern);
 	}
+
+	// CREDIT: Gavin Kistner - http://phrogz.net/js/wheeldelta.html
+	static WheelDistance(evt) {
+		if (!evt) evt = event;
+		const w = evt.wheelDelta;
+		const d = evt.detail;
+		if (d){
+			if (w) return w/d/40*d>0?1:-1; // Opera
+			else return -d/3;              // Firefox;
+		} else return w/120;             // IE/Safari/Chrome
+	}
+
+	// CREDIT: Gavin Kistner - http://phrogz.net/js/wheeldelta.html
+	static WheelDirection(evt) {
+		if (!evt) evt = event;
+		return (evt.detail<0) ? 1 : (evt.wheelDelta>0) ? 1 : -1;
+	}
 }
 
 export default Utils;

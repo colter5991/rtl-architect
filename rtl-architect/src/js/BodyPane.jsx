@@ -18,9 +18,9 @@ import MenuItem from "react-bootstrap/lib/MenuItem";
 import Overlay from "react-bootstrap/lib/Overlay";
 import Glyphicon from "react-bootstrap/lib/Glyphicon";
 import SettingsMenu from "./SettingsMenu"
-import {ReactElementResize} from "react-element-resize";
 import FileDownload from "./file-download";
 import Update from "immutability-helper";
+import {ReactElementResize} from "react-element-resize";
 
 // My Loads
 import "BodyPane.css";
@@ -65,7 +65,7 @@ class BodyPane extends React.Component {
 		this._handleUnload = this._handleUnload.bind(this);
 		this._handleFileLoad = this._handleFileLoad.bind(this);
 		this._handleSaveGraph = this._handleSaveGraph.bind(this);
-		
+
 		window.onresize = this._handleResizeWindow;
 
 		this.graph = null;
@@ -276,7 +276,8 @@ class BodyPane extends React.Component {
 	}
 
 	_handleScroll(event) {
-		const new_scale = Math.max(0.5, this.state.scale + 0.001 * event.nativeEvent.wheelDelta);
+		const wheel = Utils.WheelDistance(event.nativeEvent);
+		const new_scale = Math.max(0.5, this.state.scale + 0.1 * wheel);
 		this.graph.ScalePaper(new_scale);
 		this.setState({scale: new_scale});
 	}
@@ -294,7 +295,6 @@ class BodyPane extends React.Component {
 
 	_handleToggleMenu() {
 		this.setState({ show_settings: !this.state.show_settings });
-
 	}
 
 	_handleClockEdge(event) {
