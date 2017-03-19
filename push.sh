@@ -11,7 +11,7 @@ commit_website_files() {
 }
 
 upload_files() {
-  git push --quiet https://${GH_TOKEN}@github.com/colter5991/rtl-architect.git
+  git push https://${GH_TOKEN}@github.com/colter5991/rtl-architect.git
 }
 
 setup_git
