@@ -4,6 +4,7 @@ node_js:
 before_script:
   - npm install -g webpack
   - cd rtl-architect
+  - rm dist/*
 script:
   - npm install && webpack -p
 after_success:
